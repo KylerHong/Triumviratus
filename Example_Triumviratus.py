@@ -305,6 +305,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             if bulletRadius - 1 > 4:
                bulletRadius -= 1
 
+
         if(joyAxisValue[1] > 0): 
             print("joyAxisValue[1]")
             if (bulletY + bulletRadius * 2 + joyAxisValue[1] * 1 < 650):
