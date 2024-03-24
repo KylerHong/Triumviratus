@@ -211,6 +211,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     with open (filename_position,'w') as file_position:
         pass
     running = True
+    
     # instruction = False
     # This is the main loop that runs the GUI
     while running:
