@@ -201,6 +201,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     hover_threshold = 2.0 # in seconds, can adjust this time later
     hovering_over_target = False
     start_hover_time = 0
+    hovering_X_Ins = False
+    hovering_Y_Ins = False
     
         # Initialize filename for each trial
     filename = get_unique_filename()
@@ -210,7 +212,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     filename_position = get_unique_filename_position()
     with open (filename_position,'w') as file_position:
         pass
-    running = True
+    running = False
     
     # instruction = False
     # This is the main loop that runs the GUI
@@ -333,18 +335,46 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         surface_main.fill(WHITE)
         surface_game.fill(WHITE)
         surface_panel.fill(WHITE)
+        bulletTargetXDist = math.dist([bulletX,0],[targetX,0])
+        bulletTargetYDist = math.dist([0,bulletY],[0,targetY])
 
-  
         pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
         pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)
-        # for event in pygame.event.get():
-        #     if event.type == QUIT:
-        #         running = False
-        #         sys.exit()
-        #     if event.type == KEYDOWN:
-        #         running = False
-        #         sys.exit()
-        bulletX += constant_velocity_x
+        
+        if bulletTargetXDist <= 1:
+            bulletX += 0
+            print("bye")
+            if not hovering_X_Ins:
+                start_hover_time = time.time()
+                hovering_X_Ins = True
+            current_time = time.time()    
+            hover_duration = current_time - start_hover_time
+            if hover_duration >= hover_threshold:
+                if bulletTargetYDist <=1:
+                    bulletY += 0 
+                    if not hovering_Y_Ins:
+                        start_hover_timeY = time.time()
+                        hovering_Y_Ins = True
+                    current_timeY = time.time()
+                    hover_durationY =current_timeY - start_hover_timeY
+                    if hover_durationY >= hover_threshold:
+                        Font1 = pygame.font.SysFont("timesnewroman", 30)
+                        textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
+                        surface_main.fill(WHITE)
+                        surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
+                        pygame.display.update()
+                        time.sleep(3)
+                        return
+                else:
+                    bulletY += constant_velocity_y
+        else:
+            bulletX += constant_velocity_x
+            hovering_over_target = False
+        surface_main.blit(surface_game,(0,0))
+        surface_main.blit(surface_panel, (650, 0))
+        pygame.display.update()
+        clock.tick(120)
+
 
 def instruction():
 
@@ -489,6 +519,6 @@ def run_familiarization_trials(haptic_blocks):
                                     if event.key == pygame.K_ESCAPE:
                                         pygame.quit()
                                         sys.exit()
-# instruction()
+instruction()
 run_familiarization_trials(haptic_blocks=1)
             
