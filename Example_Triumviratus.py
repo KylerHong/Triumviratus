@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-import zmq
+# import zmq
 import sys
 import time
 import math
@@ -16,26 +16,26 @@ import struct
 import itertools
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT
 import csv
-from gpiozero import PWMLED
+# from gpiozero import PWMLED
 from time import sleep 
 import adafruit_mcp3xxx.mcp3008 as MCP
 import board
 import busio
 import digitalio
-import RPi.GPIO
+# import RPi.GPIO
 from adafruit_mcp3xxx.analog_in import AnalogIn
-SPI = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
-MCP3008_CS = digitalio.DigitalInOut(board.D22)
+# SPI = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
+# MCP3008_CS = digitalio.DigitalInOut(board.D22)
 
 
-mcp = MCP.MCP3008(SPI, MCP3008_CS)
+# mcp = MCP.MCP3008(SPI, MCP3008_CS)
 
-foot_axis = AnalogIn(mcp, MCP.P0)
+# foot_axis = AnalogIn(mcp, MCP.P0)
 
 # Initialize screen colors and set up path to Bedford scale image
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-IMAGE_PATHS = ["BedfordScale.bmp"]
+IMAGE_PATHS = ["Bedford_scale.png"]
 images = []
 inputBox = pygame.Rect(560, 100, 41, 45)
 
@@ -194,8 +194,9 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     targets_2D = [0, 3, 6, 13, 17, 19, 20, 22] 
     constant_velocity_x = 2.0
     constant_velocity_y = 2.0   
-    led = PWMLED(12)
+    # led = PWMLED(12)
     beepstarttime = 0
+    trial_x = 0 
 
     # Initialize parameters for the bullet to hover over the target
     hover_threshold = 2.0 # in seconds, can adjust this time later
@@ -230,17 +231,17 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)
         if(3*targetRadius<bulletTargetXDist):
             xVibrate  = 3*targetRadius/bulletTargetXDist
-            led.value = xVibrate
+            # led.value = xVibrate
 
         if (0.5*targetRadius<bulletTargetXDist<=3*targetRadius):
             if (current_time-beepstarttime>=0.2):
-                led.value = 0 
+                # led.value = 0 
                 beepstarttime =current_time
                 print("hi")
                 print(beepstarttime)
-            else:
+            # else:
             # sleep(0.05)
-                led.value = 1           
+                # led.value = 1           
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
@@ -330,7 +331,6 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         pygame.display.update()
         clock.tick(120)
     while instruction:
-        print("hi")
         current_time = time.time()
         surface_main.fill(WHITE)
         surface_game.fill(WHITE)
@@ -374,7 +374,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         surface_main.blit(surface_panel, (650, 0))
         pygame.display.update()
         clock.tick(120)
-
+        time.sleep(0.01)
 
 def instruction():
 
@@ -395,9 +395,9 @@ def instruction():
     scaled_val = 5 + (0.175- 0.025) * (30 - 7) / (0.175 - 0.025) #need to decide on this, I can change the 30 (max) and 7(min) to dictate radius of target
 
     Font = pygame.font.SysFont("timesnewroman", 30)
-    textSurfaceI = Font.render("Start of Instructions!", True, (0, 0, 0))
+    textsurface1 = Font.render("Start of Instructions!", True, (0, 0, 0))
     surface_main.fill(WHITE)
-    surface_main.blit(textSurfaceI, ((SCREEN_WIDTH - textSurfaceI.get_width())/2, (SCREEN_HEIGHT - textSurfaceI.get_height())/2))
+    surface_main.blit(textsurface1, ((SCREEN_WIDTH - textsurface1.get_width())/2, (SCREEN_HEIGHT - textsurface1.get_height())/2))
     pygame.display.update()
     time.sleep(3)
     while TRIAL<2:
@@ -407,17 +407,23 @@ def instruction():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            trial_targets = {
-                'target_x': scaled_x,
-                'target_y': scaled_y,
-                'target_z_initial': scaled_val,
-                'target_angle': 45 } #if we don't want to be testing EMG, then the Z axis value can be held constant
+        trial_targets = {
+            'target_x': scaled_x,
+            'target_y': scaled_y,
+            'target_z_initial': scaled_val,
+            'target_angle': 45 } #if we don't want to be testing EMG, then the Z axis value can be held constant
+        surface_main.fill(WHITE)
+
+        GUI (TRIAL,START_TIME, trial_targets['target_x'], trial_targets['target_y'], trial_targets['target_z_initial'],trial_targets['target_angle'],haptic_blocks,instruction)
+        TRIAL +=1
+        if TRIAL ==2:
             surface_main.fill(WHITE)
-
-            GUI (TRIAL,START_TIME, trial_targets['target_x'], trial_targets['target_y'], trial_targets['target_z_initial'],trial_targets['target_angle'],haptic_blocks,instruction)
-            TRIAL +=1
-
-            
+            font = pygame.font.SysFont("timesnewrowman",30)
+            textSurface1 = font.render("Instruction Session Finished",True,(0,0,0))
+            surface_main.blit(textSurface1,((SCREEN_WIDTH - textSurface1.get_width())/6, (SCREEN_HEIGHT - textSurface1.get_height())/6))
+            pygame.display.flip()
+            time.sleep(3)
+                    
 def run_familiarization_trials(haptic_blocks):
     TRIAL = 0
     block = 'familiarization'
