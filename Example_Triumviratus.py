@@ -18,12 +18,12 @@ from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT
 import csv
 # from gpiozero import PWMLED
 from time import sleep 
-import adafruit_mcp3xxx.mcp3008 as MCP
-import board
+# import adafruit_mcp3xxx.mcp3008 as MCP
+# import board
 import busio
 import digitalio
 # import RPi.GPIO
-from adafruit_mcp3xxx.analog_in import AnalogIn
+# from adafruit_mcp3xxx.analog_in import AnalogIn
 # SPI = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
 # MCP3008_CS = digitalio.DigitalInOut(board.D22)
 
@@ -204,8 +204,9 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     start_hover_time = 0
     hovering_X_Ins = False
     hovering_Y_Ins = False
+    hovering_Z_Ins = False 
     
-        # Initialize filename for each trial
+    # Initialize filename for each trial
     filename = get_unique_filename()
     with open (filename,'wb') as file:
         pass
@@ -216,7 +217,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     running = False
     
     # instruction = False
-    # This is the main loop that runs the GUI
+    # This is the main loop (Testing and Familirazation Session) that runs the GUI
     while running:
         bulletTargetDistance = math.dist([startbulletX,startbulletY],[targetX,targetY])
         bulletTargetDistance = math.dist([bulletX, bulletY], [targetX, targetY])
@@ -283,22 +284,17 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         if abs(joyAxisValue[3]) < 0.1:
             joyAxisValue[3] = 0
 
-        # if (foot_axis.voltage>0.05 and foot_axis.voltage<3.0):
-        #     foot_axis.voltage = 0 
-        # print(foot_axis.voltage)
+        # for foot pedal front (toe) and rear (heel) control value mapping
         if (foot_axis.voltage>=0.02 and foot_axis.voltage <1.32):
             mapped_value = np.interp(foot_axis.voltage,[0.02,0.5],[-1,0])
         if (foot_axis.voltage>=2.0 and foot_axis.voltage<=3.30):
             mapped_value = np.interp(foot_axis.voltage,[2.0,3.3],[0,1])
 
-
+        # Joystick control and foot pedal for X:left-thumb joystick  //
+        # Y: right-thumb joystick & Z: Foot pedal#
         if abs(mapped_value)<0.3:
                 mapped_value = 0 
-        # if foot_axis.voltage <0.05:
-        #     radiusFlag = 1
-        # elif foot_axis.voltage > 3.00:
-        #     radiusFlag =2 
-        # ##### JOYSTICK CONTROL WITH CONSTANT VELOCITY#################################
+
         bulletX = max(0, min(bulletX, 640))
         bulletY = max(0, min(bulletY, 640))            
         if(mapped_value > 0):
@@ -307,8 +303,6 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         elif(mapped_value < 0):
             if bulletRadius - 1 > 4:
                bulletRadius -= 1
-
-
         if(joyAxisValue[1] > 0): 
             print("joyAxisValue[1]")
             if (bulletY + bulletRadius * 2 + joyAxisValue[1] * 1 < 650):
@@ -330,6 +324,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         surface_main.blit(surface_panel, (650, 0))
         pygame.display.update()
         clock.tick(120)
+# This is the instruction session loop that runs the GUI
     while instruction:
         current_time = time.time()
         surface_main.fill(WHITE)
@@ -343,7 +338,6 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         
         if bulletTargetXDist <= 1:
             bulletX += 0
-            print("bye")
             if not hovering_X_Ins:
                 start_hover_time = time.time()
                 hovering_X_Ins = True
@@ -358,13 +352,23 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                     current_timeY = time.time()
                     hover_durationY =current_timeY - start_hover_timeY
                     if hover_durationY >= hover_threshold:
-                        Font1 = pygame.font.SysFont("timesnewroman", 30)
-                        textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
-                        surface_main.fill(WHITE)
-                        surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
-                        pygame.display.update()
-                        time.sleep(3)
-                        return
+                        if abs(targetRadius-bulletRadius) <= 1:
+                            bulletRadius += 0 
+                            if not hovering_Z_Ins:
+                                start_hover_timeZ = time.time()
+                                hovering_Z_Ins = True
+                            current_timeZ = time.time()
+                            hover_durationZ = current_timeZ - start_hover_timeZ
+                            if hover_durationZ >= hover_threshold:
+                                Font1 = pygame.font.SysFont("timesnewroman", 30)
+                                textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
+                                surface_main.fill(WHITE)
+                                surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
+                                pygame.display.update()
+                                time.sleep(3)
+                                return
+                        else: 
+                            bulletRadius +=1   
                 else:
                     bulletY += constant_velocity_y
         else:
@@ -420,7 +424,7 @@ def instruction():
             surface_main.fill(WHITE)
             font = pygame.font.SysFont("timesnewrowman",30)
             textSurface1 = font.render("Instruction Session Finished",True,(0,0,0))
-            surface_main.blit(textSurface1,((SCREEN_WIDTH - textSurface1.get_width())/6, (SCREEN_HEIGHT - textSurface1.get_height())/6))
+            surface_main.blit(textSurface1,((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/2))
             pygame.display.flip()
             time.sleep(3)
                     
