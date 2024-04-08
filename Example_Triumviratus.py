@@ -166,6 +166,7 @@ def calculate_coordination(filename,targetAngle):
     return rounded_coord_score
 
 haptic_blocks = [2, 3, 4, 5] # this is really arbitraty since this gets changed later anyways
+control_mapping_blocks = [1,2,3]
 def HapticX (bulletTargetXDist, targetRadius,beepstarttime,ledx):
     if(3*targetRadius<bulletTargetXDist):
         xVibrate  = 3*targetRadius/bulletTargetXDist
@@ -214,7 +215,7 @@ def HapticY (bulletTargetYDist, targetRadius,beepstarttime,ledy):
     return beepstarttime
 def stop_HapticY(ledy):
     ledy.value = 0 
-def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_blocks,instruction,running):
+def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_blocks,instruction,running,control_mapping_blocks):
     # Initialize all necessary parameters
     WHITE = (255, 255, 255)
     bulletRadius = 20
@@ -246,7 +247,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     ledy = PWMLED(13)
     beepstarttime = time.time()
     trial_x = 0 
-
+    print(haptic_blocks,control_mapping_blocks)
     # Initialize parameters for the bullet to hover over the target
     hover_threshold = 2.0 # in seconds, can adjust this time later
     hovering_over_target = False
@@ -368,33 +369,104 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
 
         bulletX = max(0, min(bulletX, 640))
         bulletY = max(0, min(bulletY, 640))            
-        if(mapped_value > 0):
-            if bulletRadius + 1 < 38 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
-               bulletRadius += 1
-        elif(mapped_value < 0):
-            if bulletRadius - 1 > 4:
-               bulletRadius -= 1
-        if(joyAxisValue[1] > 0): 
-            print("joyAxisValue[1]")
-            if (bulletY + bulletRadius * 2 + joyAxisValue[1] * 1 < 650):
-                bulletY += joyAxisValue[1]*constant_velocity_y
-        if(joyAxisValue[1] < 0):
-            if(bulletY + bulletRadius * 2 + joyAxisValue[1] * 1 >0):
-                bulletY += joyAxisValue[1]*constant_velocity_y
-        if(joyAxisValue[3] > 0):                                            # x-axis = joystick 2
-            if(bulletX + bulletRadius * 2 + joyAxisValue[3] * 1 < 650):
-                bulletX += joyAxisValue[3]*constant_velocity_x
-            # if (0.5*targetRadius<bulletTargetXDist<=3*targetRadius):
-            #     bulletX += joyAxisValue[3]*5
-        if(joyAxisValue[3] < 0):
-            if(bulletX - bulletRadius * 2 + joyAxisValue[3] * 1 > 0):
-                bulletX += joyAxisValue[3]*constant_velocity_x
+        if control_mapping_blocks == 1:
+            if(mapped_value > 0):
+                if bulletRadius + 1 < 38 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
+                    bulletRadius += 1
+            elif(mapped_value < 0):
+                if bulletRadius - 1 > 4:
+                    bulletRadius -= 1
+            if(joyAxisValue[1] > 0): 
+                if (bulletY + bulletRadius * 2 + joyAxisValue[1] * 1 < 650):
+                    bulletY += joyAxisValue[1]*constant_velocity_y
+            if(joyAxisValue[1] < 0):
+                if(bulletY + bulletRadius * 2 + joyAxisValue[1] * 1 >0):
+                    bulletY += joyAxisValue[1]*constant_velocity_y
+            if(joyAxisValue[3] > 0):                                            # x-axis = joystick 2
+                if(bulletX + bulletRadius * 2 + joyAxisValue[3] * 1 < 650):
+                    bulletX += joyAxisValue[3]*constant_velocity_x
+                # if (0.5*targetRadius<bulletTargetXDist<=3*targetRadius):
+                #     bulletX += joyAxisValue[3]*5
+            if(joyAxisValue[3] < 0):
+                if(bulletX - bulletRadius * 2 + joyAxisValue[3] * 1 > 0):
+                    bulletX += joyAxisValue[3]*constant_velocity_x
+
+        elif control_mapping_blocks == 2:
+            if(mapped_value > 0):
+                if(bulletX + bulletRadius*2 +mapped_value <650):
+                # if bulletRadius + 1 < 38 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
+                    bulletX += 2
+            elif(mapped_value < 0):
+                if(bulletX - bulletRadius * 2 + mapped_value * 1 > 0):
+                # if bulletRadius - 1 > 4:
+                    bulletX -= 2
+            if(joyAxisValue[1] > 0): 
+                if bulletRadius + 1 < 38 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
+                    bulletRadius += 1
+            if(joyAxisValue[1] < 0):
+                if bulletRadius - 1 > 4:
+                    bulletRadius -= 1
+            if(joyAxisValue[3] > 0):                                            # x-axis = joystick 2
+                if(bulletY + bulletRadius * 2 + joyAxisValue[3] * 1 < 650):
+                    bulletY += joyAxisValue[3]*constant_velocity_y
+                # if (0.5*targetRadius<bulletTargetXDist<=3*targetRadius):
+                #     bulletX += joyAxisValue[3]*5
+            if(joyAxisValue[3] < 0):
+                if(bulletY - bulletRadius * 2 + joyAxisValue[3] * 1 > 0):
+                    bulletY += joyAxisValue[3]*constant_velocity_y
             # if (0.5*targetRadius<bulletTargetXDist<=3*targetRadius):
             #     bulletX += joyAxisValue[3]*5
         surface_main.blit(surface_game,(0,0))
         surface_main.blit(surface_panel, (650, 0))
         pygame.display.update()
         clock.tick(120)
+        if(bulletTargetDistance <= 10 and abs(bulletRadius - targetRadius) <= 1):
+            if not hovering_over_target:
+                start_hover_time = time.time()
+                hovering_over_target = True
+            current_time = time.time()    
+            hover_duration = current_time - start_hover_time
+            # if subject hovers over target position long enough (meets success criteria)
+            if hover_duration >= hover_threshold:
+                radiusFlag = 0
+                #duration of trial
+                duration = current_time - START_TIME
+
+				# Coordination
+                # rounded_coord_score_success = calculate_coordination(filename,targetAngle)
+
+				# Robot communication
+
+				# Dispaly success message and coordination score measure
+                Font1 = pygame.font.SysFont("timesnewroman", 30)
+                Font2 = pygame.font.SysFont("timesnewroman", 60)
+                textSurface1 = Font1.render("SUCCESS!", True, (0, 0, 0))
+                # textSurface2 = Font2.render(f"Coordination: {rounded_coord_score_success} %",True, (0,0,0))
+                surface_main.fill(WHITE)
+                surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
+                # surface_main.blit(textSurface2, ((SCREEN_WIDTH - textSurface2.get_width())/2, (SCREEN_HEIGHT - textSurface2.get_height())/2))
+                pygame.display.update()
+                time.sleep(3)
+                return
+            else:
+                hovering_over_target = False
+
+		# Trial times out after x seconds
+        if(time.time() - START_TIME > 10): # you can change this number to shorten or extend how long the trials are for testing
+            # rounded_coord_score_fail = calculate_coordination(filename, targetAngle)
+			# Display fail message
+            Font1 = pygame.font.SysFont("timesnewroman", 30)
+            Font2 = pygame.font.SysFont("timesnewroman", 60)
+            textSurface1 = Font1.render("Trial timed out!", True, (0, 0, 0))
+            # textSurface2 = Font2.render(f"Coordination: {rounded_coord_score_fail} %",True, (0,0,0))
+            surface_main.fill(WHITE)
+            surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
+            # surface_main.blit(textSurface2, ((SCREEN_WIDTH - textSurface2.get_width())/2, (SCREEN_HEIGHT - textSurface2.get_height())/2))
+            pygame.display.update()
+            time.sleep(3)
+            return
+        time.sleep(0.01)
+
 # This is the instruction session loop that runs the GUI
     while instruction:
         current_time = time.time()
@@ -684,7 +756,7 @@ def instruction(haptic_blocks):
                         done =True 
                         time.sleep(3)
                         
-def run_familiarization_trials(haptic_blocks):
+def run_familiarization_trials(haptic_blocks,control_mapping_blocks):
     TRIAL = 0
     block = 'familiarization'
     # here we create the randomized trial target positions each time a new block is called
@@ -710,7 +782,7 @@ def run_familiarization_trials(haptic_blocks):
     time.sleep(3)
     
     # Main experiment loop
-    while TRIAL < 5:
+    while TRIAL < 1:
         instruction = False 
         running = True
         # Initialize trial targets
@@ -743,12 +815,12 @@ def run_familiarization_trials(haptic_blocks):
                         }
 
 
-                    GUI(TRIAL, START_TIME, trial_targets['target_x'], trial_targets['target_y'], trial_targets['target_z_initial'],trial_targets['target_angle'], haptic_blocks, instruction, running) # here we call the main script to initiate the bullet/target trial screen
+                    GUI(TRIAL, START_TIME, trial_targets['target_x'], trial_targets['target_y'], trial_targets['target_z_initial'],trial_targets['target_angle'], haptic_blocks, instruction, running,control_mapping_blocks) # here we call the main script to initiate the bullet/target trial screen
                     TRIAL += 1
                     
                     duration = time.time() - START_TIME
 
-                    if TRIAL == 5:
+                    if TRIAL == 1:
                         done = False
                         surface_main.fill(WHITE)
                         textInput = ''
@@ -774,26 +846,61 @@ def run_familiarization_trials(haptic_blocks):
                                         surface_main.blit(TEXT, (inputBox.x + 5, inputBox.y + 5))
                                         pygame.display.flip()
                                         #print("Current Input:", textInput)
+                                    elif event.key == pygame.K_BACKSPACE:
+                                        if len(textInput) > 0:
+                                            textInput = textInput[:-1]
+                                            TEXT = font.render(textInput, True, BLACK)
+                                            surface_main.fill(WHITE)
+                                            surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
+                                            surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
+                                            pygame.draw.rect(surface_main, BLACK, inputBox, 2)
+                                            surface_main.blit(TEXT, (inputBox.x + 5, inputBox.y + 5))
 
+                                    elif event.key == pygame.K_RETURN:
+										#if int(textInput) > 0 and int(textInput) <= 10:
                                         if textInput.isdigit() and 0 < int(textInput) <= 10:
-                                            if len(textInput) == 2:
-                                                with open("bedford_fam.pkl", "ab") as file:
-                                                    pickle.dump(textInput, file)
-                                                    done = True
-                                                print("User input accepted:", textInput)
-                                        else:
-                                            pass
+                                            with open("user_input.pkl", "ab") as file:
+                                                pickle.dump(textInput,file)
+                                                done = True
+                                        # elif int(textInput) <0 or int(textInput) >= 10:
+                                        elif not textInput.isdigit() or int(textInput) < 0 or int(textInput) >= 10:
+                                            print ('Input out of range!')
                                     
-                                    if event.key == pygame.K_ESCAPE:
-                                        pygame.quit()
-                                        sys.exit()
+                            return TRIAL, duration                                    
+
 # haptic_blocks =2 
 # instruction(haptic_blocks=5)
-run_familiarization_trials(haptic_blocks=4)
+haptic_blocks =1
+control_mapping_blocks = 1
+run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 #run_one_experiment_block(haptic_blocks)
 # now start random order of haptic conditions
-# haptic_blocks = [2,5]
-# random.shuffle(haptic_blocks)
+haptic_blocks = [2,3,4,5]
+random.shuffle(haptic_blocks)
+
+for i in range(4):
+    control_mapping_blocks =1 
+    run_familiarization_trials(haptic_blocks[i],control_mapping_blocks)
+
+haptic_blocks =1
+control_mapping_blocks =1 
+run_familiarization_trials(haptic_blocks,control_mapping_blocks)
+
+haptic_blocks =1
+control_mapping_blocks = 2
+run_familiarization_trials(haptic_blocks,control_mapping_blocks)
+#run_one_experiment_block(haptic_blocks)
+# now start random order of haptic conditions
+haptic_blocks = [2,3,4,5]
+random.shuffle(haptic_blocks)
+
+for i in range(4):
+    control_mapping_blocks =2 
+    run_familiarization_trials(haptic_blocks[i],control_mapping_blocks)
+
+haptic_blocks =1
+control_mapping_blocks =2 
+run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 # instruction(haptic_blocks[0])
 # run_familiarization_trials(haptic_blocks[0])
 #run_one_experiment_block(haptic_blocks[0])
@@ -802,3 +909,4 @@ run_familiarization_trials(haptic_blocks=4)
 # instruction(haptic_blocks)
 # run_familiarization_trials(haptic_blocks)
 #run_one_experiment_block(haptic_blocks)
+
