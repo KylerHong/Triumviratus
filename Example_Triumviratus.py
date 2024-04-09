@@ -435,6 +435,31 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             if(joyAxisValue[3] < 0):
                 if(bulletY - bulletRadius * 2 + joyAxisValue[3] * 1 > 0):
                     bulletY += joyAxisValue[3]*constant_velocity_y
+        
+        elif control_mapping_blocks == 3:
+            if(mapped_value > 0):
+                if(bulletY + bulletRadius*2 +mapped_value <650):
+                # if bulletRadius + 1 < 38 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
+                    bulletY += 2
+            elif(mapped_value < 0):
+                if(bulletY - bulletRadius * 2 + mapped_value * 1 > 0):
+                # if bulletRadius - 1 > 4:
+                    bulletY -= 2
+            if(joyAxisValue[1] > 0): 
+                if(bulletY + bulletRadius * 2 + joyAxisValue[3] * 1 < 650):
+                    bulletY += joyAxisValue[3]*constant_velocity_y
+            if(joyAxisValue[1] < 0):
+                if(bulletY - bulletRadius * 2 + joyAxisValue[3] * 1 > 0):
+                    bulletY += joyAxisValue[3]*constant_velocity_y
+            if(joyAxisValue[3] > 0):    
+                if bulletRadius + 1 < 38 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
+                    bulletRadius += 1
+                # if (0.5*targetRadius<bulletTargetXDist<=3*targetRadius):
+                #     bulletX += joyAxisValue[3]*5
+            if(joyAxisValue[3] < 0):
+                if bulletRadius - 1 > 4:
+                    bulletRadius -= 1
+        
             # if (0.5*targetRadius<bulletTargetXDist<=3*targetRadius):
             #     bulletX += joyAxisValue[3]*5
         surface_main.blit(surface_game,(0,0))
@@ -464,8 +489,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 pygame.display.update()
                 time.sleep(3)
                 return
-            else:
-                hovering_over_target = False
+        else:
+            hovering_over_target = False
 
 		# Trial times out after x seconds
         if(time.time() - START_TIME > 10): # you can change this number to shorten or extend how long the trials are for testing
@@ -882,7 +907,7 @@ def run_familiarization_trials(haptic_blocks,control_mapping_blocks):
                                         elif not textInput.isdigit() or int(textInput) < 0 or int(textInput) >= 10:
                                             print ('Input out of range!')
                                     
-                            return TRIAL, duration                                    
+                                    return TRIAL, duration                                    
 
 # haptic_blocks =2 
 # instruction(haptic_blocks=5)
