@@ -359,7 +359,9 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                     joy_time = current_time
                     xaxis = 0
                     yaxis = 0 
-                            
+        with open (filename,'ab') as file:
+            pickle.dump((joy_time, xaxis, yaxis, zaxis, xaxis_raw, yaxis_raw, zaxis_raw), file)
+ 
         with open (filename_position,'a',newline='') as file_position:
 			# json.dump(columns_data,file_position,indent=3)
             csv_writer = csv.writer(file_position)
