@@ -1,6 +1,5 @@
 import pygame
 from pygame.locals import *
-# import zmq
 import sys
 import time
 import math
@@ -8,7 +7,6 @@ import os
 import numpy as np
 import json
 import pickle
-# import pylsl
 import random
 import datetime
 #import serial
@@ -64,6 +62,7 @@ surface_main = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 surface_game = pygame.Surface((650,650))
 surface_panel = pygame.Surface((400,650))
 
+## Making unique_filename
 def get_unique_filename():
     current_number = 1
     while True:
@@ -105,6 +104,9 @@ def process_numeric_data(filename): # this function reads the pickle file that's
                 numeric_values.append(numeric_value)
             except EOFError:
                 break
+    return numeric_values
+
+## Randomize target positions    
 def randomize_target_positions(): #this should be called as many times as there are blocks
     distance = 0.80
     depth = [0.025, 0.050, 0.150, 0.175] #idk how these were decided 
@@ -167,6 +169,7 @@ def calculate_coordination(filename,targetAngle):
 
 haptic_blocks = [2, 3, 4, 5] # this is really arbitraty since this gets changed later anyways
 control_mapping_blocks = [1,2,3]
+
 def HapticX (bulletTargetXDist, targetRadius,beepstarttime,ledx):
     if(3*targetRadius<bulletTargetXDist):
         xVibrate  = 3*targetRadius/bulletTargetXDist
@@ -176,22 +179,18 @@ def HapticX (bulletTargetXDist, targetRadius,beepstarttime,ledx):
         if (current_time-beepstarttime>=0.1):
             ledx.value = 0 
             print("fuck")
-            print(current_time)
-            print(beepstarttime)
-            beepstarttime =current_time
+            beepstarttime = current_time
             print("hi")
-            print(beepstarttime)
         else:
             ledx.value = 1
             print("bye")
-            print(current_time)
     elif bulletTargetXDist<= 0.5* targetRadius:
         ledx.value = 1 
-
     return beepstarttime
 def stop_HapticX(ledx):
     ledx.value = 0 
-def HapticY (bulletTargetYDist, targetRadius,beepstarttime,ledy):
+    
+def HapticY (bulletTargetYDist,targetRadius,beepstarttime,ledy):
     if(3*targetRadius<bulletTargetYDist):
         yVibrate  = 3*targetRadius/bulletTargetYDist
         ledy.value = yVibrate
@@ -200,21 +199,34 @@ def HapticY (bulletTargetYDist, targetRadius,beepstarttime,ledy):
         if (current_time-beepstarttime>=0.1):
             ledy.value = 0 
             print("fuck")
-            print(current_time)
-            print(beepstarttime)
-            beepstarttime =current_time
+            beepstarttime = current_time
             print("hi")
-            print(beepstarttime)
         else:
             ledy.value = 1
             print("bye")
-            print(current_time)
     elif bulletTargetYDist<= 0.5* targetRadius:
         ledy.value = 1 
-
     return beepstarttime
 def stop_HapticY(ledy):
     ledy.value = 0 
+
+def HapticZ (bulletRadius, targetRadius,beepstarttime,ledz):
+    if(3/7*targetRadius < abs(bulletRadius-targetRadius)):
+        zVibrate = (3/7)*targetRadius/abs(bulletRadius-targetRadius)
+        ledz.value = zVibrate
+    elif (1/7*targetRadius<abs(bulletRadius-targetRadius)<=3/7*targetRadius):
+        current_time = time.time()
+        if (current_time-beepstarttime>=0.1):
+            ledz.value = 0 
+            print("fuck")
+            beepstarttime = current_time
+            print("hi")
+        else:
+            ledz.value = 1 
+            print("bye")
+    elif (abs(bulletRadius-targetRadius)<= 1/7*targetRadius):
+        ledz.value = 1
+        
 def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_blocks,instruction,running,control_mapping_blocks):
     # Initialize all necessary parameters
     WHITE = (255, 255, 255)
@@ -248,6 +260,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     beepstarttime = time.time()
     trial_x = 0 
     print(haptic_blocks,control_mapping_blocks)
+    
     # Initialize parameters for the bullet to hover over the target
     hover_threshold = 2.0 # in seconds, can adjust this time later
     hovering_over_target = False
@@ -346,6 +359,14 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                     joy_time = current_time
                     xaxis = 0
                     yaxis = 0 
+                            
+        with open (filename_position,'a',newline='') as file_position:
+			# json.dump(columns_data,file_position,indent=3)
+            csv_writer = csv.writer(file_position)
+            if file_position.tell() == 0:
+                csv_writer.writerow([joy_time,bulletX,bulletY,bulletRadius])
+            csv_writer.writerow([joy_time,bulletX, bulletY, bulletRadius])
+      
         #This just zeros the value of the joystick movements if they're less than 0.1
         if abs(joyAxisValue[0]) < 0.1:
             joyAxisValue[0] = 0
@@ -428,23 +449,18 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             hover_duration = current_time - start_hover_time
             # if subject hovers over target position long enough (meets success criteria)
             if hover_duration >= hover_threshold:
-                radiusFlag = 0
                 #duration of trial
                 duration = current_time - START_TIME
-
 				# Coordination
-                # rounded_coord_score_success = calculate_coordination(filename,targetAngle)
-
-				# Robot communication
-
+                rounded_coord_score_success = calculate_coordination(filename,targetAngle)
 				# Dispaly success message and coordination score measure
                 Font1 = pygame.font.SysFont("timesnewroman", 30)
                 Font2 = pygame.font.SysFont("timesnewroman", 60)
                 textSurface1 = Font1.render("SUCCESS!", True, (0, 0, 0))
-                # textSurface2 = Font2.render(f"Coordination: {rounded_coord_score_success} %",True, (0,0,0))
+                textSurface2 = Font2.render(f"Coordination: {rounded_coord_score_success} %",True, (0,0,0))
                 surface_main.fill(WHITE)
                 surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
-                # surface_main.blit(textSurface2, ((SCREEN_WIDTH - textSurface2.get_width())/2, (SCREEN_HEIGHT - textSurface2.get_height())/2))
+                surface_main.blit(textSurface2, ((SCREEN_WIDTH - textSurface2.get_width())/2, (SCREEN_HEIGHT - textSurface2.get_height())/2))
                 pygame.display.update()
                 time.sleep(3)
                 return
@@ -453,15 +469,15 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
 
 		# Trial times out after x seconds
         if(time.time() - START_TIME > 10): # you can change this number to shorten or extend how long the trials are for testing
-            # rounded_coord_score_fail = calculate_coordination(filename, targetAngle)
+            rounded_coord_score_fail = calculate_coordination(filename, targetAngle)
 			# Display fail message
             Font1 = pygame.font.SysFont("timesnewroman", 30)
             Font2 = pygame.font.SysFont("timesnewroman", 60)
             textSurface1 = Font1.render("Trial timed out!", True, (0, 0, 0))
-            # textSurface2 = Font2.render(f"Coordination: {rounded_coord_score_fail} %",True, (0,0,0))
+            textSurface2 = Font2.render(f"Coordination: {rounded_coord_score_fail} %",True, (0,0,0))
             surface_main.fill(WHITE)
             surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
-            # surface_main.blit(textSurface2, ((SCREEN_WIDTH - textSurface2.get_width())/2, (SCREEN_HEIGHT - textSurface2.get_height())/2))
+            surface_main.blit(textSurface2, ((SCREEN_WIDTH - textSurface2.get_width())/2, (SCREEN_HEIGHT - textSurface2.get_height())/2))
             pygame.display.update()
             time.sleep(3)
             return
