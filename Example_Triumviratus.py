@@ -909,7 +909,7 @@ def run_familiarization_trials(haptic_blocks,control_mapping_blocks):
                             surface_main.blit(textInput.surface, (inputBox.x + 5, inputBox.y + 5))
                             pygame.display.flip()
                             
-                            for event in pygame.event.get():
+                            for event in events:
                                 if event.type == pygame.QUIT:
                                     done = True
                                 elif event.type == pygame.KEYDOWN:
@@ -1001,8 +1001,7 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
                             pygame.draw.rect(surface_main, BLACK, inputBox, 2)
                             surface_main.blit(textInput.surface, (inputBox.x + 5, inputBox.y + 5))
                             pygame.display.flip()
-                            
-                            for event in pygame.event.get():
+                            for event in events:
                                 if event.type == pygame.QUIT:
                                     done = True
                                 elif event.type == pygame.KEYDOWN:
@@ -1012,8 +1011,8 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
                                         with open("bedford_test_middle.pkl","ab") as file:
                                             pickle.dump(textInput.value,file)
                                         done = True                                    
-                                    return TRIAL, duration                                    
-
+                    if TRIAL == 12 and done:
+                        continue
                     if TRIAL == 24:
                         done = False
                         surface_main.fill(WHITE)
@@ -1033,8 +1032,7 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
                             pygame.draw.rect(surface_main, BLACK, inputBox, 2)
                             surface_main.blit(textInput.surface, (inputBox.x + 5, inputBox.y + 5))
                             pygame.display.flip()
-                            
-                            for event in pygame.event.get():
+                            for event in events:
                                 if event.type == pygame.QUIT:
                                     done = True
                                 elif event.type == pygame.KEYDOWN:
