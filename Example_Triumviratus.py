@@ -559,7 +559,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)   
             Instruction_font = pygame.font.SysFont("timesnewroman",30)
-            Instruction_surface = Instruction_font.render("Instruction Finished!", True, (0, 0, 0))
+            Instruction_surface = Instruction_font.render("Visual information: X & Y & Z with Haptic Feedback: X & Y & Z", True, (0, 0, 0))
             surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
 
      
