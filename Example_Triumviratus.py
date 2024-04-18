@@ -226,7 +226,9 @@ def HapticZ (bulletRadius, targetRadius,beepstarttime,ledz):
             print("bye")
     elif (abs(bulletRadius-targetRadius)<= 1/7*targetRadius):
         ledz.value = 1
-        
+    return beepstarttime
+def stop_HapticY(ledz):
+    ledz.value = 0     
 def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_blocks,instruction,running,control_mapping_blocks):
     # Initialize all necessary parameters
     WHITE = (255, 255, 255)
@@ -257,7 +259,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     constant_velocity_y = 2.0   
     ledx = PWMLED(12)
     ledy = PWMLED(13)
-    ledz = PWMLED()
+    ledz = PWMLED(18)
     beepstarttime = time.time()
     trial_x = 0 
     print(haptic_blocks,control_mapping_blocks)
@@ -271,13 +273,14 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     hovering_Z_Ins = False 
     
     # Initialize filename for each trial
-    filename = get_unique_filename()
-    with open (filename,'wb') as file:
-        pass
+    if running:
+        filename = get_unique_filename()
+        with open (filename,'wb') as file:
+            pass
 
-    filename_position = get_unique_filename_position()
-    with open (filename_position,'w') as file_position:
-        pass
+        filename_position = get_unique_filename_position()
+        with open (filename_position,'w') as file_position:
+            pass
     # running = False
     
     # instruction = False
@@ -508,8 +511,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         bulletTargetXDist = math.dist([bulletX,0],[targetX,0])
         bulletTargetYDist = math.dist([0,bulletY],[0,targetY])
         pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
-        pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)   
-        if haptic_blocks == 1:
+        # pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)   
+        if haptic_blocks == 1:         
             if bulletTargetXDist <= 1:
                 bulletX += 0
                 if not hovering_X_Ins:
@@ -555,6 +558,10 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx)
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)   
+            Instruction_font = pygame.font.SysFont("timesnewroman",30)
+            Instruction_surface = Instruction_font.render("Instruction Finished!", True, (0, 0, 0))
+            surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
+
      
        #No Haptic feedback blocks
         if haptic_blocks == 2:
