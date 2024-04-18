@@ -21,6 +21,7 @@ import board
 import busio
 import digitalio
 import RPi.GPIO
+import pygame_textinput
 from adafruit_mcp3xxx.analog_in import AnalogIn
 SPI = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
 MCP3008_CS = digitalio.DigitalInOut(board.D22)
@@ -109,7 +110,7 @@ def process_numeric_data(filename): # this function reads the pickle file that's
 ## Randomize target positions    
 def randomize_target_positions(): #this should be called as many times as there are blocks
     distance = 0.80
-    depth = [0.025, 0.050, 0.150, 0.175] #idk how these were decided 
+    depth = [0.025, 1.025, 3.025, 4.025] #idk how these were decided 
     pos = []
     grp_pos = []
 
@@ -130,7 +131,7 @@ def randomize_target_positions(): #this should be called as many times as there 
             # Scaling
             scaled_x = min_scaled + (x - min_original) * (max_scaled - min_scaled) / (max_original - min_original)
             scaled_y = min_scaled + (y - min_original) * (max_scaled - min_scaled) / (max_original - min_original)
-            scaled_val = 5 + (val - 0.025) * (30 - 7) / (0.175 - 0.025) #need to decide on this, I can change the 30 (max) and 7(min) to dictate radius of target
+            scaled_val = 10 + (val - 0.025) /0.2 #need to decide on this, I can change the 30 (max) and 7(min) to dictate radius of target
 
             # Scale and map val to fit within screen height
             pos.append((scaled_x, scaled_y, scaled_val, deg, distance))
@@ -605,6 +606,9 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 hovering_over_target = False
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)   
+            Instruction_font = pygame.font.SysFont("timesnewroman",30)
+            Instruction_surface = Instruction_font.render("Visual information: X & Y & Z without Haptic Feedback", True, (0, 0, 0))
+            surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
 
         # Two visual and one haptic (z direction)
         if haptic_blocks == 3:
@@ -649,6 +653,10 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 hovering_over_target = False
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),20)   
+            Instruction_font = pygame.font.SysFont("timesnewroman",30)
+            Instruction_surface = Instruction_font.render("Visual information: X & Y with Haptic Feedback: Z", True, (0, 0, 0))
+            surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
+
        #Two Haptic feedback and one visaul (z)
         if haptic_blocks == 4:
             if bulletTargetXDist <= 1:
@@ -695,6 +703,10 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx)
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (325,325),bulletRadius)   
+            Instruction_font = pygame.font.SysFont("timesnewroman",30)
+            Instruction_surface = Instruction_font.render("Visual information: Z with Haptic Feedback: X & Y", True, (0, 0, 0))
+            surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
+
        #all haptic feedback (z)
         if haptic_blocks == 5:
             if bulletTargetXDist <= 1:
@@ -741,6 +753,10 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx)
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (325,325),20)   
+            Instruction_font = pygame.font.SysFont("timesnewroman",30)
+            Instruction_surface = Instruction_font.render("Only Haptic Feedback: X & Y & Z", True, (0, 0, 0))
+            surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
+
 
         # beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx)
         surface_main.blit(surface_game,(0,0))
@@ -835,7 +851,7 @@ def run_familiarization_trials(haptic_blocks,control_mapping_blocks):
     time.sleep(3)
     
     # Main experiment loop
-    while TRIAL < 1:
+    while TRIAL < 6:
         instruction = False 
         running = True
         # Initialize trial targets
@@ -873,52 +889,36 @@ def run_familiarization_trials(haptic_blocks,control_mapping_blocks):
                     
                     duration = time.time() - START_TIME
 
-                    if TRIAL == 1:
+                    if TRIAL == 6:
                         done = False
                         surface_main.fill(WHITE)
-                        textInput = ''
+                        font = pygame.font.SysFont("timesnewroman", 30)
+                        textSurface = font.render("BREAK-input number. For 1-10", True, (0, 0, 0))
+                        surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
+                        textInput = pygame_textinput.TextInputVisualizer()
                         while not done:
-                            font = pygame.font.SysFont("timesnewroman", 30)
-                            textSurface = font.render("BREAK-input number. For 1-9, type 0 first.", True, (0, 0, 0))
-                            surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
+                            events = pygame.event.get()
                             surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
                             pygame.draw.rect(surface_main, BLACK, inputBox, 2)
                             pygame.display.flip()
+                            surface_main.fill(WHITE)
+                            textInput.update(events)
+                            surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
+                            surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
+                            pygame.draw.rect(surface_main, BLACK, inputBox, 2)
+                            surface_main.blit(textInput.surface, (inputBox.x + 5, inputBox.y + 5))
+                            pygame.display.flip()
+                            
                             for event in pygame.event.get():
                                 if event.type == pygame.QUIT:
-                                    pygame.quit()
-                                    sys.exit()
+                                    done = True
                                 elif event.type == pygame.KEYDOWN:
-                                    if event.unicode.isnumeric():
-                                        textInput += event.unicode
-                                        TEXT = font.render(textInput, True, BLACK)
-                                        surface_main.fill(WHITE)
-                                        surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
-                                        surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
-                                        pygame.draw.rect(surface_main, BLACK, inputBox, 2)
-                                        surface_main.blit(TEXT, (inputBox.x + 5, inputBox.y + 5))
-                                        pygame.display.flip()
-                                        #print("Current Input:", textInput)
-                                    elif event.key == pygame.K_BACKSPACE:
-                                        if len(textInput) > 0:
-                                            textInput = textInput[:-1]
-                                            TEXT = font.render(textInput, True, BLACK)
-                                            surface_main.fill(WHITE)
-                                            surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
-                                            surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
-                                            pygame.draw.rect(surface_main, BLACK, inputBox, 2)
-                                            surface_main.blit(TEXT, (inputBox.x + 5, inputBox.y + 5))
-
+                                    if event.key == pygame.K_ESCAPE:
+                                        done = True 
                                     elif event.key == pygame.K_RETURN:
-										#if int(textInput) > 0 and int(textInput) <= 10:
-                                        if textInput.isdigit() and 0 < int(textInput) <= 10:
-                                            with open("user_input.pkl", "ab") as file:
-                                                pickle.dump(textInput,file)
-                                                done = True
-                                        # elif int(textInput) <0 or int(textInput) >= 10:
-                                        elif not textInput.isdigit() or int(textInput) < 0 or int(textInput) >= 10:
-                                            print ('Input out of range!')
-                                    
+                                        with open("bedford_fam.pkl","ab") as file:
+                                            pickle.dump(textInput.value,file)
+                                        done = True                                    
                                     return TRIAL, duration                                    
 def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
     TRIAL = 0
@@ -946,7 +946,7 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
     time.sleep(3)
     
     # Main experiment loop
-    while TRIAL < 1:
+    while TRIAL < 24:
         instruction = False 
         running = True
         # Initialize trial targets
@@ -981,55 +981,69 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
 
                     GUI(TRIAL, START_TIME, trial_targets['target_x'], trial_targets['target_y'], trial_targets['target_z_initial'],trial_targets['target_angle'], haptic_blocks, instruction, running,control_mapping_blocks) # here we call the main script to initiate the bullet/target trial screen
                     TRIAL += 1
-                    
                     duration = time.time() - START_TIME
-
-                    if TRIAL == 1:
+                    if TRIAL == 12:
                         done = False
                         surface_main.fill(WHITE)
-                        textInput = ''
+                        font = pygame.font.SysFont("timesnewroman", 30)
+                        textSurface = font.render("BREAK-input number. For 1-10", True, (0, 0, 0))
+                        surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
+                        textInput = pygame_textinput.TextInputVisualizer()
                         while not done:
-                            font = pygame.font.SysFont("timesnewroman", 30)
-                            textSurface = font.render("BREAK-input number. For 1-9, type 0 first.", True, (0, 0, 0))
-                            surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
+                            events = pygame.event.get()
                             surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
                             pygame.draw.rect(surface_main, BLACK, inputBox, 2)
                             pygame.display.flip()
+                            surface_main.fill(WHITE)
+                            textInput.update(events)
+                            surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
+                            surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
+                            pygame.draw.rect(surface_main, BLACK, inputBox, 2)
+                            surface_main.blit(textInput.surface, (inputBox.x + 5, inputBox.y + 5))
+                            pygame.display.flip()
+                            
                             for event in pygame.event.get():
                                 if event.type == pygame.QUIT:
-                                    pygame.quit()
-                                    sys.exit()
+                                    done = True
                                 elif event.type == pygame.KEYDOWN:
-                                    if event.unicode.isnumeric():
-                                        textInput += event.unicode
-                                        TEXT = font.render(textInput, True, BLACK)
-                                        surface_main.fill(WHITE)
-                                        surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
-                                        surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
-                                        pygame.draw.rect(surface_main, BLACK, inputBox, 2)
-                                        surface_main.blit(TEXT, (inputBox.x + 5, inputBox.y + 5))
-                                        pygame.display.flip()
-                                        #print("Current Input:", textInput)
-                                    elif event.key == pygame.K_BACKSPACE:
-                                        if len(textInput) > 0:
-                                            textInput = textInput[:-1]
-                                            TEXT = font.render(textInput, True, BLACK)
-                                            surface_main.fill(WHITE)
-                                            surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
-                                            surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
-                                            pygame.draw.rect(surface_main, BLACK, inputBox, 2)
-                                            surface_main.blit(TEXT, (inputBox.x + 5, inputBox.y + 5))
-
+                                    if event.key == pygame.K_ESCAPE:
+                                        done = True 
                                     elif event.key == pygame.K_RETURN:
-										#if int(textInput) > 0 and int(textInput) <= 10:
-                                        if textInput.isdigit() and 0 < int(textInput) <= 10:
-                                            with open("user_input.pkl", "ab") as file:
-                                                pickle.dump(textInput,file)
-                                                done = True
-                                        # elif int(textInput) <0 or int(textInput) >= 10:
-                                        elif not textInput.isdigit() or int(textInput) < 0 or int(textInput) >= 10:
-                                            print ('Input out of range!')
-                                    
+                                        with open("bedford_test_middle.pkl","ab") as file:
+                                            pickle.dump(textInput.value,file)
+                                        done = True                                    
+                                    return TRIAL, duration                                    
+
+                    if TRIAL == 24:
+                        done = False
+                        surface_main.fill(WHITE)
+                        font = pygame.font.SysFont("timesnewroman", 30)
+                        textSurface = font.render("BREAK-input number. For 1-10", True, (0, 0, 0))
+                        surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
+                        textInput = pygame_textinput.TextInputVisualizer()
+                        while not done:
+                            events = pygame.event.get()
+                            surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
+                            pygame.draw.rect(surface_main, BLACK, inputBox, 2)
+                            pygame.display.flip()
+                            surface_main.fill(WHITE)
+                            textInput.update(events)
+                            surface_main.blit(textSurface, ((SCREEN_WIDTH - textSurface.get_width())/6, (SCREEN_HEIGHT - textSurface.get_height())/6))
+                            surface_main.blit(scaled_image, ((SCREEN_WIDTH-scaled_width)/1.5, (SCREEN_HEIGHT-scaled_height)/1.5))
+                            pygame.draw.rect(surface_main, BLACK, inputBox, 2)
+                            surface_main.blit(textInput.surface, (inputBox.x + 5, inputBox.y + 5))
+                            pygame.display.flip()
+                            
+                            for event in pygame.event.get():
+                                if event.type == pygame.QUIT:
+                                    done = True
+                                elif event.type == pygame.KEYDOWN:
+                                    if event.key == pygame.K_ESCAPE:
+                                        done = True 
+                                    elif event.key == pygame.K_RETURN:
+                                        with open("bedford_test_last.pkl","ab") as file:
+                                            pickle.dump(textInput.value,file)
+                                        done = True                                    
                                     return TRIAL, duration                                    
 
 # haptic_blocks =2 
