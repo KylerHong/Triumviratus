@@ -20,7 +20,11 @@ from gpiozero import PWMLED
 import pygame_textinput
 import warnings
 
+<<<<<<< HEAD
 testing_just_GUI = False
+=======
+testing_just_GUI = True
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 # Ignore all warnings when just testing
 warnings.filterwarnings("ignore")
 
@@ -41,7 +45,7 @@ if testing_just_GUI == False:
 # Initialize screen colors and set up path to Bedford scale image
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-IMAGE_PATHS = ["BedfordScale.bmp"]
+IMAGE_PATHS = ["BedfordScale.png"]
 images = []
 inputBox = pygame.Rect(560, 100, 41, 45)
 
@@ -116,7 +120,11 @@ def process_numeric_data(filename): # this function reads the pickle file that's
 
 ## Randomize target positions    
 def randomize_target_positions(): #this should be called as many times as there are blocks
+<<<<<<< HEAD
     distance = 0.7
+=======
+    distance = 0.80
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
     #depth = [0.025, 1.025, 3.025, 4.025] #idk how these were decided 
     radius = [10, 15, 25, 30]
     pos = []
@@ -194,7 +202,11 @@ control_mapping_blocks = [1,2,3]
 
 def HapticX (bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx):
     if(3*targetRadius<bulletTargetXDist):
+<<<<<<< HEAD
         xVibrate = np.interp(bulletTargetXDist,[3*targetRadius,bulletTargetXDistance],[1,0])
+=======
+        xVibrate  = 3*targetRadius/bulletTargetXDist
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
         try:
             ledx.value = xVibrate
         except AttributeError:
@@ -207,12 +219,20 @@ def HapticX (bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime
                 ledx.value = 0
             except AttributeError:
                 ledx = 0
+<<<<<<< HEAD
+=======
+            print("frick")
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
             beepstarttime = current_time
         else:
             try:
                 ledx.value = 1
             except AttributeError:
                 ledx = 1
+<<<<<<< HEAD
+=======
+            print("bye")
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
     elif bulletTargetXDist<= 0.5* targetRadius:
         try:
             ledx.value = 1
@@ -224,9 +244,15 @@ def stop_HapticX(ledx):
         ledx.value = 0 
     except AttributeError:
         ledx = 0
+<<<<<<< HEAD
 def HapticY (bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy):
     if(3*targetRadius<bulletTargetYDist):
         yVibrate = np.interp(bulletTargetYDist,[3*targetRadius,bulletTargetYDistance],[1,0])
+=======
+def HapticY (bulletTargetYDist,targetRadius,beepstarttime,ledy):
+    if(3*targetRadius<bulletTargetYDist):
+        yVibrate  = 3*targetRadius/bulletTargetYDist
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
         try:
             ledy.value = yVibrate
         except AttributeError:
@@ -238,12 +264,20 @@ def HapticY (bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,
                 ledy.value = 0
             except AttributeError:
                 ledy = 0 
+<<<<<<< HEAD
+=======
+            print("frick")
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
             beepstarttime = current_time
         else:
             try:
                 ledy.value = 1
             except AttributeError:
                 ledy = 1
+<<<<<<< HEAD
+=======
+            print("bye")
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
     elif bulletTargetYDist<= 0.5* targetRadius:
         try:
             ledy.value = 1
@@ -258,7 +292,11 @@ def stop_HapticY(ledy):
 
 def HapticZ (bulletTargetZDistance,bulletRadius, targetRadius,beepstarttime,ledz):
     if(3/7*targetRadius < abs(bulletRadius-targetRadius)):
+<<<<<<< HEAD
         zVibrate = np.interp(abs(bulletRadius-targetRadius),[3/7*targetRadius,bulletTargetZDistance],[1,0])
+=======
+        zVibrate = (3/7)*targetRadius/abs(bulletRadius-targetRadius)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
         try:
             ledz.value = zVibrate
         except AttributeError:
@@ -270,12 +308,20 @@ def HapticZ (bulletTargetZDistance,bulletRadius, targetRadius,beepstarttime,ledz
                 ledz.value = 0 
             except AttributeError:
                 ledz = 0
+<<<<<<< HEAD
+=======
+            print("frick")
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
             beepstarttime = current_time
         else:
             try:
                 ledz.value = 1 
             except AttributeError:
                 ledz = 1
+<<<<<<< HEAD
+=======
+            print("bye")
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
     elif (abs(bulletRadius-targetRadius)<= 1/7*targetRadius):
         try:
             ledz.value = 1
@@ -318,6 +364,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     targets_2D = [0, 3, 6, 13, 17, 19, 20, 22] 
     constant_velocity_x = 2.0
     constant_velocity_y = 2.0
+<<<<<<< HEAD
     if testing_just_GUI == False:
         # if control mapping = 1, ledx = 12; ledy = 13;, ledz = 19  
 
@@ -337,6 +384,16 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             ledx = 1
             ledy = 1
             ledz = 1
+=======
+    if testing_just_GUI == False:  
+        ledx = PWMLED(12)
+        ledy = PWMLED(13)
+        ledz = PWMLED(18)
+    else:
+        ledx = 1
+        ledy = 1
+        ledz = 1
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
     beepstarttime = time.time()
     trial_x = 0 
@@ -381,9 +438,15 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
 			#print ('I am running condition 1!')
             bulletColor = (132, 0, 132)     
             pygame.draw.circle(surface_game, bulletColor, (bulletX, bulletY), bulletRadius)
+<<<<<<< HEAD
             beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
             beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
             beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
+=======
+            beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx)
+            beepstarttime = HapticY(bulletTargetYDist,targetRadius,beepstarttime,ledy)
+            beepstarttime = HapticZ(bulletRadius,targetRadius,beepstarttime,ledz)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
         #Only Visual Information
         elif haptic_blocks == 2:
@@ -394,15 +457,24 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
 			#print ('I am running condition 1!')
             bulletColor = (132, 0, 132)     
             pygame.draw.circle(surface_game, bulletColor, (bulletX, bulletY), 20)
+<<<<<<< HEAD
             beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
+=======
+            beepstarttime = HapticZ(bulletRadius,targetRadius,beepstarttime,ledz)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
         #Two Haptic Feedback w. One Visual Information (z)
         elif haptic_blocks == 4:
 			#print ('I am running condition 1!')
             bulletColor = (132, 0, 132)     
             pygame.draw.circle(surface_game, bulletColor, (325, 325), bulletRadius)
+<<<<<<< HEAD
             beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
             beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+=======
+            beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx)
+            beepstarttime = HapticY(bulletTargetYDist,targetRadius,beepstarttime,ledy)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
         #Only Haptic Feedback
         elif haptic_blocks == 5:
@@ -424,6 +496,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 # Assign coordination scores depending on which axes are active
                 if event.axis <= 24:
                     joyAxisValue[event.axis] = event.value
+<<<<<<< HEAD
 
                     if control_mapping_blocks == 1:
                         xaxis_raw = joyAxisValue[3]
@@ -506,6 +579,29 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 #     joy_time = current_time
                 #     xaxis = 0
                 #     yaxis = 0 
+=======
+                    print(joyAxisValue)
+                    xaxis_raw = joyAxisValue[2]
+                    yaxis_raw = joyAxisValue[1]
+                    
+                # If we are only allowing a joystick to control either x or y
+                if joyAxisValue[2] and joyAxisValue[1] is not 0:
+                    joy_time = current_time
+                    xaxis = 1
+                    yaxis = 1 
+                elif joyAxisValue[2] == 0 and joyAxisValue[1] is not 0:
+                    joy_time = current_time
+                    xaxis = 0
+                    yaxis = 1
+                elif joyAxisValue[2] is not 0 and joyAxisValue[1] == 0:
+                    joy_time = current_time
+                    xaxis = 1
+                    yaxis = 0
+                else:
+                    joy_time = current_time
+                    xaxis = 0
+                    yaxis = 0 
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
         
         if testing_just_GUI == False:
             # for foot pedal front (toe) and rear (heel) control value mapping
@@ -565,6 +661,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         #     mapped_value = 0
       
 
+<<<<<<< HEAD
         # # streaming values to pkl file for zaxis
         # if mapped_value > 0 or mapped_value <0:
         #     zaxis = 1
@@ -572,6 +669,29 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         # else:
         #     zaxis = 0
 
+=======
+        # if testing_just_GUI == False:
+        #     # for foot pedal front (toe) and rear (heel) control value mapping
+        #     if (foot_axis.voltage>=0.02 and foot_axis.voltage <1.32):
+        #         mapped_value = np.interp(foot_axis.voltage,[0.02,0.5],[-1,0])
+        #     if (foot_axis.voltage>=2.0 and foot_axis.voltage<=3.30):
+        #         mapped_value = np.interp(foot_axis.voltage,[2.0,3.3],[0,1])
+        # if testing_just_GUI == True:
+        #     mapped_value = 1
+
+        # # Joystick control and foot pedal for X:left-thumb joystick  //
+        # # Y: right-thumb joystick & Z: Foot pedal#
+        # if abs(mapped_value)<0.3:
+        #     mapped_value = 0
+      
+
+        # # streaming values to pkl file for zaxis
+        # if mapped_value > 0 or mapped_value <0:
+        #     zaxis = 1
+        #     zaxis_raw = mapped_value
+        # else:
+        #     zaxis = 0
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
         
         if control_mapping_blocks == 1:
@@ -587,6 +707,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                     print(bulletY)
                     print(targetY)
             if(joyAxisValue[1] < 0):
+<<<<<<< HEAD
                 if(bulletY - bulletRadius >0):
                     bulletY -= constant_velocity_y
                     print(bulletY)
@@ -597,6 +718,18 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 if(bulletX - bulletRadius > 0):
                     bulletX -= constant_velocity_x
                     
+=======
+                if(bulletY + bulletRadius * 2 + joyAxisValue[1] * 1 >0):
+                    bulletY += joyAxisValue[1]*constant_velocity_y
+            if(joyAxisValue[2] > 0):                                            # x-axis = joystick 2
+                if(bulletX + bulletRadius * 2 + joyAxisValue[2] * 1 < 650):
+                    bulletX += joyAxisValue[2]*constant_velocity_x
+                # if (0.5*targetRadius<bulletTargetXDist<=3*targetRadius):
+                #     bulletX += joyAxisValue[3]*5
+            if(joyAxisValue[2] < 0):
+                if(bulletX - bulletRadius * 2 + joyAxisValue[2] * 1 > 0):
+                    bulletX += joyAxisValue[2]*constant_velocity_x
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
         elif control_mapping_blocks == 2:
             if(mapped_value > 0):
@@ -610,6 +743,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                     bulletRadius += 0.5
             if(joyAxisValue[4] < 0):
                 if bulletRadius - 1 > 4:
+<<<<<<< HEAD
                     bulletRadius -= 0.5
             if(joyAxisValue[0] > 0):                                            # x-axis = joystick 2
                 if(bulletX + bulletRadius  < 650):
@@ -617,6 +751,15 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             if(joyAxisValue[0] < 0):
                 if(bulletX - bulletRadius > 0):
                     bulletX -= constant_velocity_x
+=======
+                    bulletRadius -= 1
+            if(joyAxisValue[2] > 0):                                            # x-axis = joystick 2
+                if(bulletY + bulletRadius * 2 + joyAxisValue[2] * 1 < 650):
+                    bulletY += joyAxisValue[2]*constant_velocity_y
+            if(joyAxisValue[2] < 0):
+                if(bulletY - bulletRadius * 2 + joyAxisValue[2] * 1 > 0):
+                    bulletY += joyAxisValue[2]*constant_velocity_y
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
         
         elif control_mapping_blocks == 3:
             if(mapped_value > 0):
@@ -626,6 +769,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 if(bulletX - bulletRadius > 0):
                     bulletX -= 2
             if(joyAxisValue[1] > 0): 
+<<<<<<< HEAD
                 if bulletRadius + 1 < 36 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
                     bulletRadius += 0.5
             if(joyAxisValue[1] < 0):
@@ -637,12 +781,29 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             if(joyAxisValue[4] < 0):
                 if (bulletY - bulletRadius  > 0):
                     bulletY -= constant_velocity_y
+=======
+                if(bulletY + bulletRadius * 2 + joyAxisValue[2] * 1 < 650):
+                    bulletY += joyAxisValue[2]*constant_velocity_y
+            if(joyAxisValue[1] < 0):
+                if(bulletY - bulletRadius * 2 + joyAxisValue[2] * 1 > 0):
+                    bulletY += joyAxisValue[2]*constant_velocity_y
+            if(joyAxisValue[2] > 0):    
+                if bulletRadius + 1 < 38 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
+                    bulletRadius += 1
+            if(joyAxisValue[2] < 0):
+                if bulletRadius - 1 > 4:
+                    bulletRadius -= 1
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
                     
         surface_main.blit(surface_game,(0,0))
         surface_main.blit(surface_panel, (650, 0))
         pygame.display.update()
         clock.tick(120)
+<<<<<<< HEAD
         if(bulletTargetDistance <= 10 and abs(bulletRadius - targetRadius) <= 3): #need to test out bullet radius size to see how well it works
+=======
+        if(bulletTargetDistance <= 10 and abs(bulletRadius - targetRadius) <= 2): #need to test out bullet radius size to see how well it works
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
             if not hovering_over_target:
                 start_hover_time = time.time()
                 hovering_over_target = True
@@ -669,7 +830,11 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             hovering_over_target = False
 
 		# Trial times out after x seconds
+<<<<<<< HEAD
         if(time.time() - START_TIME > 60): # you can change this number to shorten or extend how long the trials are for testing
+=======
+        if(time.time() - START_TIME > 10): # you can change this number to shorten or extend how long the trials are for testing
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
             end_time = time.time() - START_TIME
             print(end_time)
             rounded_coord_score_fail = calculate_coordination(filename, targetAngle, end_time)
@@ -744,15 +909,27 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                     return
                             else: 
                                 bulletRadius +=1   
+<<<<<<< HEAD
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
                     else:
                         bulletY += constant_velocity_y
                         beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+=======
+                                beepstarttime = HapticZ(bulletRadius,targetRadius,beepstarttime,ledz)
+
+                    else:
+                        bulletY += constant_velocity_y
+                        beepstarttime = HapticY(bulletTargetYDist,targetRadius,beepstarttime,ledy)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
             else:
                 bulletX += 1
                 hovering_over_target = False
+<<<<<<< HEAD
                 beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
+=======
+                beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)   
@@ -873,7 +1050,11 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                     return
                             else: 
                                 bulletRadius +=1 
+<<<<<<< HEAD
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
+=======
+                                beepstarttime = HapticZ(bulletRadius,targetRadius,beepstarttime,ledz)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
                     else:
                         bulletY += constant_velocity_y
@@ -941,12 +1122,22 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 bulletRadius +=1   
                     else:
                         bulletY += constant_velocity_y
+<<<<<<< HEAD
                         beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+=======
+                        beepstarttime = HapticY(bulletTargetYDist,targetRadius,beepstarttime,ledy)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
             else:
                 bulletX += 1
                 hovering_over_target = False
+<<<<<<< HEAD
                 beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
+=======
+                beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx) 
+
+
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (325,325),bulletRadius)   
             Instruction_font = pygame.font.SysFont("timesnewroman",20)
@@ -997,7 +1188,10 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 current_timeZ = time.time()
                                 hover_durationZ = current_timeZ - start_hover_timeZ
                                 if hover_durationZ >= hover_threshold:
+<<<<<<< HEAD
                                     stop_HapticZ(ledz)
+=======
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
                                     Font1 = pygame.font.SysFont("timesnewroman", 20)
                                     textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
                                     surface_main.fill(WHITE)
@@ -1010,16 +1204,28 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
                     else:
                         bulletY += constant_velocity_y
+<<<<<<< HEAD
                         beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+=======
+                        beepstarttime = HapticY(bulletTargetYDist,targetRadius,beepstarttime,ledy)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
             else:
                 bulletX += 1
                 hovering_over_target = False
+<<<<<<< HEAD
                 beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
 
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (325,325),20)   
             Instruction_font = pygame.font.SysFont("timesnewroman",20)
+=======
+                beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx)
+
+            pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
+            pygame.draw.circle(surface_game, (102, 0, 102), (325,325),20)   
+            Instruction_font = pygame.font.SysFont("timesnewroman",30)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 #            Instruction_surface = Instruction_font.render("Only Haptic Feedback: X & Y & Z", True, (0, 0, 0))
 #            surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
             line1 = "You will NOT SEE cursor move in any direction"
@@ -1133,7 +1339,11 @@ def run_familiarization_trials(haptic_blocks,control_mapping_blocks):
     time.sleep(1.5)
     
     # Main experiment loop
+<<<<<<< HEAD
     while TRIAL < 5:
+=======
+    while TRIAL < 2:
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
         instruction = False 
         running = True
         # Initialize trial targets
@@ -1171,7 +1381,11 @@ def run_familiarization_trials(haptic_blocks,control_mapping_blocks):
                     
                     duration = time.time() - START_TIME
 
+<<<<<<< HEAD
                     if TRIAL == 5:
+=======
+                    if TRIAL == 2:
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
                         done = False
                         print("It's time to take Bedford & finish the familiarization session")
                         surface_main.fill(WHITE)
@@ -1335,6 +1549,7 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
 
 # haptic_blocks =2 
 # instruction(haptic_blocks=5)
+<<<<<<< HEAD
 haptic_blocks = 1
 control_mapping_blocks = 3
 # instruction(haptic_blocks,control_mapping_blocks)
@@ -1346,6 +1561,17 @@ run_testing_trial_block(haptic_blocks,control_mapping_blocks)
 # random.shuffle(haptic_blocks)
 # with open('haptic_conditions.txt','a') as file_haptic_conditions:
 #    file_haptic_conditions.write(f"{haptic_blocks}\n")
+=======
+haptic_blocks =1
+control_mapping_blocks = 1
+#instruction(haptic_blocks,control_mapping_blocks)
+run_familiarization_trials(haptic_blocks,control_mapping_blocks)
+#run_testing_trial_block(haptic_blocks,control_mapping_blocks)
+#run_one_experiment_block(haptic_blocks)
+# now start random order of haptic conditions
+#haptic_blocks = [2,3,4,5]
+#random.shuffle(haptic_blocks)
+>>>>>>> dda1b75ccc9c5da90f607ddf7fbba2a87b95630c
 
 # for i in range(4):
 #     control_mapping_blocks =1 
