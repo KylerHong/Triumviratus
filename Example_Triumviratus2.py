@@ -20,7 +20,7 @@ from gpiozero import PWMLED
 import pygame_textinput
 import warnings
 
-testing_just_GUI = True
+testing_just_GUI = False
 # Ignore all warnings when just testing
 warnings.filterwarnings("ignore")
 
@@ -41,7 +41,7 @@ if testing_just_GUI == False:
 # Initialize screen colors and set up path to Bedford scale image
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-IMAGE_PATHS = ["BedfordScale.png"]
+IMAGE_PATHS = ["BedfordScale.bmp"]
 images = []
 inputBox = pygame.Rect(560, 100, 41, 45)
 
@@ -188,7 +188,7 @@ def calculate_coordination(filename,targetAngle,trial_time):
 haptic_blocks = [2, 3, 4, 5] # this is really arbitraty since this gets changed later anyways
 control_mapping_blocks = [1,2,3]
 
-def HapticX (bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx):
+def HapticX (bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttimex,ledx):
     if(0.8*targetRadius<bulletTargetXDist):
         xVibrate = np.interp(bulletTargetXDist,[0.8*targetRadius,bulletTargetXDistance],[0,1])
         try:
@@ -196,14 +196,14 @@ def HapticX (bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime
         except AttributeError:
             xVibrate = 1
 
-    elif (0<bulletTargetXDist<=0.8*targetRadius):
+    elif (0<=bulletTargetXDist<=0.8*targetRadius):
         current_time = time.time()
-        if (current_time-beepstarttime>=0.1):
+        if (current_time-beepstarttimex>=0.1):
             try:
                 ledx.value = 0
             except AttributeError:
                 ledx = 0
-            beepstarttime = current_time
+            beepstarttimex = current_time
         else:
             try:
                 ledx.value = 1
@@ -214,27 +214,27 @@ def HapticX (bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime
     #         ledx.value = 1
     #     except AttributeError:
     #         ledx = 1        
-    return beepstarttime
+    return beepstarttimex
 def stop_HapticX(ledx):
     try:
         ledx.value = 0 
     except AttributeError:
         ledx = 0
-def HapticY (bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy):
+def HapticY (bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttimey,ledy):
     if(0.8*targetRadius<bulletTargetYDist):
         yVibrate = np.interp(bulletTargetYDist,[0.8*targetRadius,bulletTargetYDistance],[0,1])
         try:
             ledy.value = yVibrate
         except AttributeError:
             ledy = yVibrate
-    elif (0<bulletTargetYDist<=0.8*targetRadius):
+    elif (0<=bulletTargetYDist<=0.8*targetRadius):
         current_time = time.time()
-        if (current_time-beepstarttime>=0.1):
+        if (current_time-beepstarttimey>=0.1):
             try:
                 ledy.value = 0
             except AttributeError:
                 ledy = 0 
-            beepstarttime = current_time
+            beepstarttimey = current_time
         else:
             try:
                 ledy.value = 1
@@ -245,7 +245,7 @@ def HapticY (bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,
     #         ledy.value = 1
     #     except AttributeError:
     #         ledy = 1 
-    return beepstarttime
+    return beepstarttimey
 def stop_HapticY(ledy):
     try:
         ledy.value = 0 
@@ -259,7 +259,7 @@ def HapticZ (bulletTargetZDistance,bulletRadius, targetRadius,beepstarttime,ledz
             ledz.value = zVibrate
         except AttributeError:
             ledz = zVibrate
-    elif (0<abs(bulletRadius-targetRadius)<=3):
+    elif (0<=abs(bulletRadius-targetRadius)<=3):
         current_time = time.time()
         if (current_time-beepstarttime>=0.1):
             try:
@@ -338,7 +338,9 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             ledx = 1
             ledy = 1
             ledz = 1
-
+    
+    beepstarttimex = time.time()
+    beepstarttimey = time.time()
     beepstarttime = time.time()
     trial_x = 0 
     print(haptic_blocks,control_mapping_blocks)
@@ -383,8 +385,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             bulletColor = (132, 0, 132)     
             pygame.draw.circle(surface_game, (102, 0 , 102), (bulletX, bulletY), bulletRadius)
             #pygame.draw.circle(surface_game, bulletColor, (bulletX, bulletY), bulletRadius)
-            beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
-            beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+            beepstarttimex = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttimex,ledx)
+            beepstarttimey = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttimey,ledy)
             beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
 
         #Only Visual Information
@@ -727,12 +729,12 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
                     else:
                         bulletY += constant_velocity_y
-                        beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+                        beepstarttimey = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttimey,ledy)
 
             else:
                 bulletX += 1
                 hovering_over_target = False
-                beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
+                beepstarttimex = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttimex,ledx)
 
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)   
@@ -1325,29 +1327,28 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
 
 # haptic_blocks =2 
 # instruction(haptic_blocks=5)
-haptic_blocks = 4
+haptic_blocks = 1
 control_mapping_blocks = 1
-#instruction(haptic_blocks,control_mapping_blocks)
-#run_familiarization_trials(haptic_blocks,control_mapping_blocks)
-run_testing_trial_block(haptic_blocks,control_mapping_blocks)
 instruction(haptic_blocks,control_mapping_blocks)
+run_familiarization_trials(haptic_blocks,control_mapping_blocks)
+run_testing_trial_block(haptic_blocks,control_mapping_blocks)
 #run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 #run_testing_trial_block(haptic_blocks,control_mapping_blocks)
 # #run_one_experiment_block(haptic_blocks)
 # # now start random order of haptic conditions
-haptic_blocks = [4,5]
+haptic_blocks = [2,3,4,5]
 random.shuffle(haptic_blocks)
 with open('haptic_conditions.txt','a') as file_haptic_conditions:
    file_haptic_conditions.write(f"{haptic_blocks}\n")
 
 for i in range(4):
-    control_mapping_blocks =2 
+    control_mapping_blocks =1 
     instruction(haptic_blocks[i],control_mapping_blocks)
     run_familiarization_trials(haptic_blocks[i],control_mapping_blocks)
     run_testing_trial_block(haptic_blocks[i],control_mapping_blocks)
 
 haptic_blocks =1
-control_mapping_blocks =2
+control_mapping_blocks =1
 instruction(haptic_blocks,control_mapping_blocks)
 run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 run_testing_trial_block(haptic_blocks,control_mapping_blocks)
