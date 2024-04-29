@@ -176,21 +176,13 @@ def calculate_coordination(filename,targetAngle,trial_time):
 #this way of calculating score assumes that the order of angles and target distances is random and not known each block
     if targetAngle == 0 or targetAngle == 180:
         # for testing joystick, no accurate
-<<<<<<< HEAD
-        coord_score = ((coord_y + coord_z)/2)/length_xyzlist * 100
-=======
->>>>>>> 53541c2138140cd55943e577672dcfe147c4ceb3
-        #coord_score = ((coord_y + coord_x)/2)/trial_time
         coord_score = ((coord_y + coord_z)/2)/length_xyzlist * 100
         rounded_coord_score = round(coord_score,2)
     else:
         # for testing joystick, no accurate
-        # coord_score = ((coord_y + coord_x)/2)/length_xyzlist * 100
-        #coord_score = ((coord_x + coord_y + coord_z)/3)/trial_time
         coord_score = ((coord_x + coord_y + coord_z)/3)/length_xyzlist * 100
         rounded_coord_score = round(coord_score,2)
-
-    
+  
     return rounded_coord_score
 
 haptic_blocks = [2, 3, 4, 5] # this is really arbitraty since this gets changed later anyways
@@ -497,26 +489,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                             joy_time = current_time
                             yaxis = 0
                             zaxis = 0 
-
-
-                # If we are only allowing a joystick to control either x or y
-                # if joyAxisValue[3] and joyAxisValue[1] is not 0:
-                #     joy_time = current_time
-                #     xaxis = 1
-                #     yaxis = 1 
-                # elif joyAxisValue[3] == 0 and joyAxisValue[1] is not 0:
-                #     joy_time = current_time
-                #     xaxis = 0
-                #     yaxis = 1
-                # elif joyAxisValue[3] is not 0 and joyAxisValue[1] == 0:
-                #     joy_time = current_time
-                #     xaxis = 1
-                #     yaxis = 0
-                # else:
-                #     joy_time = current_time
-                #     xaxis = 0
-                #     yaxis = 0 
-        
+      
         if testing_just_GUI == False:
             # for foot pedal front (toe) and rear (heel) control value mapping
             if (foot_axis.voltage>=0.02 and foot_axis.voltage <1.32):
@@ -530,36 +503,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         # Y: right-thumb joystick & Z: Foot pedal#
         if abs(mapped_value)<0.3:
             mapped_value = 0
-      
-        # # streaming values to pkl file for zaxis
-        # if control_mapping_blocks == 1:
-        #     if mapped_value > 0 or mapped_value <0:
-        #         zaxis = 1
-        #         zaxis_raw = mapped_value
-        #     else:
-        #         zaxis = 0
-        # elif control_mapping_blocks == 2:
-        #     if mapped_value > 0 or mapped_value <0:
-        #         yaxis = 1
-        #         yaxis_raw = mapped_value
-        #     else:
-        #         yaxis = 0   
-        # elif control_mapping_blocks == 3:
-        #     if mapped_value > 0 or mapped_value <0:
-        #         xaxis = 1
-        #         xaxis_raw = mapped_value
-        #     else:
-        #         xaxis = 0      
 
-        with open (filename,'ab') as file:
-            pickle.dump((joy_time, xaxis, yaxis, zaxis, xaxis_raw, yaxis_raw, zaxis_raw), file)
- 
-        with open (filename_position,'a',newline='') as file_position:
-			# json.dump(columns_data,file_position,indent=3)
-            csv_writer = csv.writer(file_position)
-            if file_position.tell() == 0:
-                csv_writer.writerow([joy_time,bulletX,bulletY,bulletRadius,xaxis, yaxis,zaxis])
-            csv_writer.writerow([joy_time,bulletX, bulletY, bulletRadius,xaxis, yaxis,zaxis])
       
         #This just zeros the value of the joystick movements if they're less than 0.1
         if abs(joyAxisValue[0]) < 0.1:
@@ -573,30 +517,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         if abs(joyAxisValue[4]) < 0.1:
             joyAxisValue[4] = 0
 
-        # if testing_just_GUI == False:
-        #     # for foot pedal front (toe) and rear (heel) control value mapping
-        #     if (foot_axis.voltage>=0.02 and foot_axis.voltage <1.32):
-        #         mapped_value = np.interp(foot_axis.voltage,[0.02,0.5],[-1,0])
-        #     if (foot_axis.voltage>=2.0 and foot_axis.voltage<=3.30):
-        #         mapped_value = np.interp(foot_axis.voltage,[2.0,3.3],[0,1])
-        # if testing_just_GUI == True:
-        #     mapped_value = 1
-
-        # # Joystick control and foot pedal for X:left-thumb joystick  //
-        # # Y: right-thumb joystick & Z: Foot pedal#
-        # if abs(mapped_value)<0.3:
-        #     mapped_value = 0
-      
-
-        # # streaming values to pkl file for zaxis
-        # if mapped_value > 0 or mapped_value <0:
-        #     zaxis = 1
-        #     zaxis_raw = mapped_value
-        # else:
-        #     zaxis = 0
-
-
-        
+       
         if control_mapping_blocks == 1:
             if(mapped_value > 0):
                 zaxis = 1
@@ -685,7 +606,16 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 if (bulletY - bulletRadius  > 0):
                     bulletY -= constant_velocity_y
         pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius,3)
-
+        with open (filename,'ab') as file:
+            pickle.dump((joy_time, xaxis, yaxis, zaxis, xaxis_raw, yaxis_raw, zaxis_raw), file)
+ 
+        with open (filename_position,'a',newline='') as file_position:
+			# json.dump(columns_data,file_position,indent=3)
+            csv_writer = csv.writer(file_position)
+            if file_position.tell() == 0:
+                csv_writer.writerow([joy_time,bulletX,bulletY,bulletRadius,xaxis, yaxis,zaxis])
+            csv_writer.writerow([joy_time,bulletX, bulletY, bulletRadius,xaxis, yaxis,zaxis])
+            
         surface_main.blit(surface_game,(0,0))
         surface_main.blit(surface_panel, (650, 0))
         pygame.display.update()
@@ -1126,13 +1056,10 @@ def instruction(haptic_blocks,control_mapping_blocks):
     surface_main.fill(WHITE)
     surface_main.blit(textsurface1, ((SCREEN_WIDTH - textsurface1.get_width())/2, (SCREEN_HEIGHT - textsurface1.get_height())/2))
     pygame.display.update()
-<<<<<<< HEAD
-    time.sleep(3)
-    while TRIAL<3:
-=======
     time.sleep(1)
-    while TRIAL<2:
->>>>>>> 53541c2138140cd55943e577672dcfe147c4ceb3
+    while TRIAL<3:
+    #     time.sleep(1)
+    # while TRIAL<2:
         running = False 
         instruction = True
         print("TRIAL")
@@ -1400,15 +1327,12 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
 # instruction(haptic_blocks=5)
 haptic_blocks = 4
 control_mapping_blocks = 1
-<<<<<<< HEAD
 #instruction(haptic_blocks,control_mapping_blocks)
 #run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 run_testing_trial_block(haptic_blocks,control_mapping_blocks)
-=======
 instruction(haptic_blocks,control_mapping_blocks)
 #run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 #run_testing_trial_block(haptic_blocks,control_mapping_blocks)
->>>>>>> 53541c2138140cd55943e577672dcfe147c4ceb3
 # #run_one_experiment_block(haptic_blocks)
 # # now start random order of haptic conditions
 haptic_blocks = [4,5]
