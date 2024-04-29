@@ -176,7 +176,7 @@ def calculate_coordination(filename,targetAngle,trial_time):
     #this way of calculating score assumes that the order of angles and target distances is random and not known each block
     if targetAngle == 0 or targetAngle == 180:
         # for testing joystick, no accurate
-        coord_score = ((coord_y + coord_x)/2)/length_xyzlist * 100
+        coord_score = ((coord_y + coord_z)/2)/length_xyzlist * 100
         #coord_score = ((coord_y + coord_x)/2)/trial_time
         #coord_score = ((coord_y + coord_z)/2)/length_xyzlist * 100
         rounded_coord_score = round(coord_score,2)
@@ -193,14 +193,14 @@ haptic_blocks = [2, 3, 4, 5] # this is really arbitraty since this gets changed 
 control_mapping_blocks = [1,2,3]
 
 def HapticX (bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx):
-    if(3*targetRadius<bulletTargetXDist):
-        xVibrate = np.interp(bulletTargetXDist,[3*targetRadius,bulletTargetXDistance],[1,0])
+    if(0.8*targetRadius<bulletTargetXDist):
+        xVibrate = np.interp(bulletTargetXDist,[0.8*targetRadius,bulletTargetXDistance],[0,1])
         try:
             ledx.value = xVibrate
         except AttributeError:
             xVibrate = 1
 
-    elif (0.5*targetRadius<bulletTargetXDist<=3*targetRadius):
+    elif (0<bulletTargetXDist<=0.8*targetRadius):
         current_time = time.time()
         if (current_time-beepstarttime>=0.1):
             try:
@@ -213,11 +213,11 @@ def HapticX (bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime
                 ledx.value = 1
             except AttributeError:
                 ledx = 1
-    elif bulletTargetXDist<= 0.5* targetRadius:
-        try:
-            ledx.value = 1
-        except AttributeError:
-            ledx = 1        
+    # elif bulletTargetXDist<= 0.5* targetRadius:
+    #     try:
+    #         ledx.value = 1
+    #     except AttributeError:
+    #         ledx = 1        
     return beepstarttime
 def stop_HapticX(ledx):
     try:
@@ -225,13 +225,13 @@ def stop_HapticX(ledx):
     except AttributeError:
         ledx = 0
 def HapticY (bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy):
-    if(3*targetRadius<bulletTargetYDist):
-        yVibrate = np.interp(bulletTargetYDist,[3*targetRadius,bulletTargetYDistance],[1,0])
+    if(0.8*targetRadius<bulletTargetYDist):
+        yVibrate = np.interp(bulletTargetYDist,[0.8*targetRadius,bulletTargetYDistance],[0,1])
         try:
             ledy.value = yVibrate
         except AttributeError:
             ledy = yVibrate
-    elif (0.5*targetRadius<bulletTargetYDist<=3*targetRadius):
+    elif (0<bulletTargetYDist<=0.8*targetRadius):
         current_time = time.time()
         if (current_time-beepstarttime>=0.1):
             try:
@@ -244,11 +244,11 @@ def HapticY (bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,
                 ledy.value = 1
             except AttributeError:
                 ledy = 1
-    elif bulletTargetYDist<= 0.5* targetRadius:
-        try:
-            ledy.value = 1
-        except AttributeError:
-            ledy = 1 
+    # elif bulletTargetYDist<= 0.5* targetRadius:
+    #     try:
+    #         ledy.value = 1
+    #     except AttributeError:
+    #         ledy = 1 
     return beepstarttime
 def stop_HapticY(ledy):
     try:
@@ -257,13 +257,13 @@ def stop_HapticY(ledy):
         ledy = 0
 
 def HapticZ (bulletTargetZDistance,bulletRadius, targetRadius,beepstarttime,ledz):
-    if(3/7*targetRadius < abs(bulletRadius-targetRadius)):
-        zVibrate = np.interp(abs(bulletRadius-targetRadius),[3/7*targetRadius,bulletTargetZDistance],[1,0])
+    if(3< abs(bulletRadius-targetRadius)):
+        zVibrate = np.interp(abs(bulletRadius-targetRadius),[3,bulletTargetZDistance],[0,1])
         try:
             ledz.value = zVibrate
         except AttributeError:
             ledz = zVibrate
-    elif (1/7*targetRadius<abs(bulletRadius-targetRadius)<=3/7*targetRadius):
+    elif (0<abs(bulletRadius-targetRadius)<=3):
         current_time = time.time()
         if (current_time-beepstarttime>=0.1):
             try:
@@ -276,11 +276,11 @@ def HapticZ (bulletTargetZDistance,bulletRadius, targetRadius,beepstarttime,ledz
                 ledz.value = 1 
             except AttributeError:
                 ledz = 1
-    elif (abs(bulletRadius-targetRadius)<= 1/7*targetRadius):
-        try:
-            ledz.value = 1
-        except AttributeError:
-            ledz = 1
+    # elif (abs(bulletRadius-targetRadius)<= 1/7*targetRadius):
+    #     try:
+    #         ledz.value = 1
+    #     except AttributeError:
+    #         ledz = 1
     return beepstarttime
 
 def stop_HapticZ(ledz): # is this an error? input was ledz so I replaced it with ledy
@@ -408,7 +408,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         elif haptic_blocks == 5:
 			#print ('I am running condition 1!')
             bulletColor = (132, 0, 132)     
-            pygame.draw.circle(surface_game, bulletColor, (325, 325), bulletRadius)
+            pygame.draw.circle(surface_game, bulletColor, (325, 325), 20)
             beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
             beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
             beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
@@ -642,7 +642,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         surface_main.blit(surface_panel, (650, 0))
         pygame.display.update()
         clock.tick(120)
-        if(bulletTargetDistance <= 10 and abs(bulletRadius - targetRadius) <= 3): #need to test out bullet radius size to see how well it works
+        if(bulletTargetXDist <= 0.8*targetRadius and bulletTargetYDist <=0.8*targetRadius and abs(bulletRadius - targetRadius) <= 3): #need to test out bullet radius size to see how well it works
             if not hovering_over_target:
                 start_hover_time = time.time()
                 hovering_over_target = True
@@ -726,14 +726,15 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                         if hover_durationY >= hover_threshold:
                             if testing_just_GUI == False:
                                 stop_HapticY(ledy)
-                            if abs(targetRadius-bulletRadius) <= 1:
+                            if abs(targetRadius-bulletRadius) <= 3:
                                 bulletRadius += 0 
                                 if not hovering_Z_Ins:
                                     start_hover_timeZ = time.time()
                                     hovering_Z_Ins = True
                                 current_timeZ = time.time()
                                 hover_durationZ = current_timeZ - start_hover_timeZ
-                                if hover_durationZ >= hover_threshold:
+                                beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
+                                if hover_durationZ >= 5:
                                     stop_HapticZ(ledz)
                                     Font1 = pygame.font.SysFont("timesnewroman", 30)
                                     textSurface1 = Font1.render("Press A", True, (0, 0, 0))
@@ -743,7 +744,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                     time.sleep(1)
                                     return
                             else: 
-                                bulletRadius +=1   
+                                bulletRadius +=0.5
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
                     else:
                         bulletY += constant_velocity_y
@@ -811,7 +812,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                     time.sleep(3)
                                     return
                             else: 
-                                bulletRadius +=1   
+                                bulletRadius +=0.5   
                     else:
                         bulletY += constant_velocity_y
             else:
@@ -862,7 +863,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                     hovering_Z_Ins = True
                                 current_timeZ = time.time()
                                 hover_durationZ = current_timeZ - start_hover_timeZ
-                                if hover_durationZ >= hover_threshold:
+                                beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
+                                if hover_durationZ >= 5:
                                     stop_HapticZ(ledz)
                                     Font1 = pygame.font.SysFont("timesnewroman", 30)
                                     textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
@@ -872,7 +874,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                     time.sleep(3)
                                     return
                             else: 
-                                bulletRadius +=1 
+                                bulletRadius +=0.5 
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
 
                     else:
@@ -938,7 +940,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                     time.sleep(3)
                                     return
                             else: 
-                                bulletRadius +=1   
+                                bulletRadius +=0.5
                     else:
                         bulletY += constant_velocity_y
                         beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
@@ -996,7 +998,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                     hovering_Z_Ins = True
                                 current_timeZ = time.time()
                                 hover_durationZ = current_timeZ - start_hover_timeZ
-                                if hover_durationZ >= hover_threshold:
+                                beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
+                                if hover_durationZ >= 5:
                                     stop_HapticZ(ledz)
                                     Font1 = pygame.font.SysFont("timesnewroman", 20)
                                     textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
@@ -1006,7 +1009,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                     time.sleep(3)
                                     return
                             else: 
-                                bulletRadius +=1   
+                                bulletRadius +=0.5   
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
                     else:
                         bulletY += constant_velocity_y
@@ -1069,7 +1072,7 @@ def instruction(haptic_blocks,control_mapping_blocks):
     surface_main.blit(textsurface1, ((SCREEN_WIDTH - textsurface1.get_width())/2, (SCREEN_HEIGHT - textsurface1.get_height())/2))
     pygame.display.update()
     time.sleep(3)
-    while TRIAL<2:
+    while TRIAL<3:
         running = False 
         instruction = True
         print("TRIAL")
@@ -1087,13 +1090,13 @@ def instruction(haptic_blocks,control_mapping_blocks):
                 trial_targets = {
                     'target_x': scaled_x,
                     'target_y': scaled_y,
-                    'target_z_initial': scaled_val,
+                    'target_z_initial': 30,
                     'target_angle': 45 } #if we don't want to be testing EMG, then the Z axis value can be held constant
                 surface_main.fill(WHITE)
 
                 GUI (TRIAL,START_TIME, trial_targets['target_x'], trial_targets['target_y'], trial_targets['target_z_initial'],trial_targets['target_angle'],haptic_blocks,instruction,running,control_mapping_blocks)
                 TRIAL +=1
-                if TRIAL ==2:
+                if TRIAL ==3:
                     done = False 
                     print("They finished the instruction session")
                     surface_main.fill(WHITE)
@@ -1335,29 +1338,29 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
 
 # haptic_blocks =2 
 # instruction(haptic_blocks=5)
-haptic_blocks = 1
-control_mapping_blocks = 3
-# instruction(haptic_blocks,control_mapping_blocks)
-run_familiarization_trials(haptic_blocks,control_mapping_blocks)
+haptic_blocks = 4
+control_mapping_blocks = 1
+#instruction(haptic_blocks,control_mapping_blocks)
+#run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 run_testing_trial_block(haptic_blocks,control_mapping_blocks)
 # #run_one_experiment_block(haptic_blocks)
 # # now start random order of haptic conditions
-# haptic_blocks = [2,3,4,5]
-# random.shuffle(haptic_blocks)
-# with open('haptic_conditions.txt','a') as file_haptic_conditions:
-#    file_haptic_conditions.write(f"{haptic_blocks}\n")
+haptic_blocks = [4,5]
+random.shuffle(haptic_blocks)
+with open('haptic_conditions.txt','a') as file_haptic_conditions:
+   file_haptic_conditions.write(f"{haptic_blocks}\n")
 
-# for i in range(4):
-#     control_mapping_blocks =1 
-#     instruction(haptic_blocks[i],control_mapping_blocks)
-#     run_familiarization_trials(haptic_blocks[i],control_mapping_blocks)
-#     run_testing_trial_block(haptic_blocks[i],control_mapping_blocks)
+for i in range(4):
+    control_mapping_blocks =2 
+    instruction(haptic_blocks[i],control_mapping_blocks)
+    run_familiarization_trials(haptic_blocks[i],control_mapping_blocks)
+    run_testing_trial_block(haptic_blocks[i],control_mapping_blocks)
 
-# haptic_blocks =1
-# control_mapping_blocks =1 
-# instruction(haptic_blocks,control_mapping_blocks)
-# run_familiarization_trials(haptic_blocks,control_mapping_blocks)
-# run_testing_trial_block(haptic_blocks,control_mapping_blocks)
+haptic_blocks =1
+control_mapping_blocks =2
+instruction(haptic_blocks,control_mapping_blocks)
+run_familiarization_trials(haptic_blocks,control_mapping_blocks)
+run_testing_trial_block(haptic_blocks,control_mapping_blocks)
 
 
 # haptic_blocks =1
