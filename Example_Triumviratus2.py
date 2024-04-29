@@ -20,7 +20,7 @@ from gpiozero import PWMLED
 import pygame_textinput
 import warnings
 
-testing_just_GUI = False
+testing_just_GUI = True
 # Ignore all warnings when just testing
 warnings.filterwarnings("ignore")
 
@@ -41,7 +41,7 @@ if testing_just_GUI == False:
 # Initialize screen colors and set up path to Bedford scale image
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-IMAGE_PATHS = ["BedfordScale.bmp"]
+IMAGE_PATHS = ["BedfordScale.png"]
 images = []
 inputBox = pygame.Rect(560, 100, 41, 45)
 
@@ -67,7 +67,7 @@ clock = pygame.time.Clock()
 
 # Sets up main display parameters for the GUI
 surface_main = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),display=0)
-surface_game = pygame.Surface((650,650))
+surface_game = pygame.Surface((650,650),pygame.SRCALPHA)
 surface_panel = pygame.Surface((400,650))
 
 ## Making unique_filename
@@ -173,12 +173,15 @@ def calculate_coordination(filename,targetAngle,trial_time):
     coord_z = sum(item[3] for item in coord_xyzlist)
 
 
-    #this way of calculating score assumes that the order of angles and target distances is random and not known each block
+#this way of calculating score assumes that the order of angles and target distances is random and not known each block
     if targetAngle == 0 or targetAngle == 180:
         # for testing joystick, no accurate
+<<<<<<< HEAD
         coord_score = ((coord_y + coord_z)/2)/length_xyzlist * 100
+=======
+>>>>>>> 53541c2138140cd55943e577672dcfe147c4ceb3
         #coord_score = ((coord_y + coord_x)/2)/trial_time
-        #coord_score = ((coord_y + coord_z)/2)/length_xyzlist * 100
+        coord_score = ((coord_y + coord_z)/2)/length_xyzlist * 100
         rounded_coord_score = round(coord_score,2)
     else:
         # for testing joystick, no accurate
@@ -186,7 +189,8 @@ def calculate_coordination(filename,targetAngle,trial_time):
         #coord_score = ((coord_x + coord_y + coord_z)/3)/trial_time
         coord_score = ((coord_x + coord_y + coord_z)/3)/length_xyzlist * 100
         rounded_coord_score = round(coord_score,2)
-        
+
+    
     return rounded_coord_score
 
 haptic_blocks = [2, 3, 4, 5] # this is really arbitraty since this gets changed later anyways
@@ -318,6 +322,11 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     targets_2D = [0, 3, 6, 13, 17, 19, 20, 22] 
     constant_velocity_x = 2.0
     constant_velocity_y = 2.0
+    if testing_just_GUI == True:
+        ledx = 1
+        ledy = 1
+        ledz = 1
+
     if testing_just_GUI == False:
         # if control mapping = 1, ledx = 12; ledy = 13;, ledz = 19  
 
@@ -375,12 +384,13 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         surface_game.fill(WHITE)
         surface_panel.fill((211,211,211))
         # if targetRadius >= 20:
-        pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
+        #pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius,3)  # need to modify this for no visual feedback trials
         # pygame.draw.circle(surface_game, (102, 0, 102), (bulletX,bulletY),bulletRadius)
         if haptic_blocks == 1:
 			#print ('I am running condition 1!')
             bulletColor = (132, 0, 132)     
-            pygame.draw.circle(surface_game, bulletColor, (bulletX, bulletY), bulletRadius)
+            pygame.draw.circle(surface_game, (102, 0 , 102), (bulletX, bulletY), bulletRadius)
+            #pygame.draw.circle(surface_game, bulletColor, (bulletX, bulletY), bulletRadius)
             beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
             beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
             beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
@@ -521,12 +531,25 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         if abs(mapped_value)<0.3:
             mapped_value = 0
       
-        # streaming values to pkl file for zaxis
-        if mapped_value > 0 or mapped_value <0:
-            zaxis = 1
-            zaxis_raw = mapped_value
-        else:
-            zaxis = 0
+        # # streaming values to pkl file for zaxis
+        # if control_mapping_blocks == 1:
+        #     if mapped_value > 0 or mapped_value <0:
+        #         zaxis = 1
+        #         zaxis_raw = mapped_value
+        #     else:
+        #         zaxis = 0
+        # elif control_mapping_blocks == 2:
+        #     if mapped_value > 0 or mapped_value <0:
+        #         yaxis = 1
+        #         yaxis_raw = mapped_value
+        #     else:
+        #         yaxis = 0   
+        # elif control_mapping_blocks == 3:
+        #     if mapped_value > 0 or mapped_value <0:
+        #         xaxis = 1
+        #         xaxis_raw = mapped_value
+        #     else:
+        #         xaxis = 0      
 
         with open (filename,'ab') as file:
             pickle.dump((joy_time, xaxis, yaxis, zaxis, xaxis_raw, yaxis_raw, zaxis_raw), file)
@@ -576,11 +599,19 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         
         if control_mapping_blocks == 1:
             if(mapped_value > 0):
+                zaxis = 1
+                zaxis_raw = mapped_value
                 if bulletRadius + 1 < 36 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
                     bulletRadius += 0.5
             elif(mapped_value < 0):
+                zaxis = 1
+                zaxis_raw = mapped_value
                 if bulletRadius - 1 > 4:
                     bulletRadius -= 0.5
+            elif(mapped_value == 0):
+                zaxis = 0
+                zaxis_raw = mapped_value
+            
             if(joyAxisValue[1] > 0): 
                 if (bulletY + bulletRadius < 650):
                     bulletY += constant_velocity_y
@@ -600,11 +631,19 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
 
         elif control_mapping_blocks == 2:
             if(mapped_value > 0):
+                yaxis = 1
+                yaxis_raw = mapped_value
                 if(bulletY + bulletRadius <650):
                     bulletY += 2
             elif(mapped_value < 0):
+                yaxis = 1
+                yaxis_raw = mapped_value
                 if(bulletY - bulletRadius  > 0):
                     bulletY -= 2
+            elif(mapped_value == 0):
+                yaxis = 0
+                yaxis_raw = mapped_value
+            
             if(joyAxisValue[4] > 0): 
                 if bulletRadius + 1 < 36 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
                     bulletRadius += 0.5
@@ -620,11 +659,19 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         
         elif control_mapping_blocks == 3:
             if(mapped_value > 0):
+                xaxis = 1
+                xaxis_raw = mapped_value
                 if(bulletX + bulletRadius  <650):
                     bulletX += 2
-            if(mapped_value < 0): 
+            elif(mapped_value < 0):
+                xaxis = 1
+                xaxis_raw = mapped_value 
                 if(bulletX - bulletRadius > 0):
                     bulletX -= 2
+            elif(mapped_value == 0):
+                xaxis = 0
+                xaxis_raw = mapped_value
+            
             if(joyAxisValue[1] > 0): 
                 if bulletRadius + 1 < 36 and (bulletX + bulletRadius < 650) and (bulletX - bulletRadius > 0):
                     bulletRadius += 0.5
@@ -637,7 +684,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             if(joyAxisValue[4] < 0):
                 if (bulletY - bulletRadius  > 0):
                     bulletY -= constant_velocity_y
-                    
+        pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius,3)
+
         surface_main.blit(surface_game,(0,0))
         surface_main.blit(surface_panel, (650, 0))
         pygame.display.update()
@@ -736,8 +784,9 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
                                 if hover_durationZ >= 5:
                                     stop_HapticZ(ledz)
+                                    time.sleep(5)
                                     Font1 = pygame.font.SysFont("timesnewroman", 30)
-                                    textSurface1 = Font1.render("Press A", True, (0, 0, 0))
+                                    textSurface1 = Font1.render("Press A.", True, (0, 0, 0))
                                     surface_main.fill(WHITE)
                                     surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
                                     pygame.display.update()
@@ -762,8 +811,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             #  ... you will feel a buzz on your hands & foot", True, (0, 0, 0))
             # surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
             # Splitting the text into two lines
-            line1 = "You will SEE cursor move left/right, up/down, & change size"
-            line2 = "You will FEEL a buzz when cursor moves left/right, up/down, & changes size"
+            line1 = "As the cursor moves left/right, up/down, & change sizes,"
+            line2 = "you will FEEL a buzz on each limb controlling that movement."
 
             # Render the text for each line separately
             line1_surface = Instruction_font.render(line1, True, (0, 0, 0))
@@ -804,12 +853,13 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 current_timeZ = time.time()
                                 hover_durationZ = current_timeZ - start_hover_timeZ
                                 if hover_durationZ >= hover_threshold:
+                                    time.sleep(5)
                                     Font1 = pygame.font.SysFont("timesnewroman", 30)
-                                    textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
+                                    textSurface1 = Font1.render("Press A.", True, (0, 0, 0))
                                     surface_main.fill(WHITE)
                                     surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
                                     pygame.display.update()
-                                    time.sleep(3)
+                                    time.sleep(1)
                                     return
                             else: 
                                 bulletRadius +=0.5   
@@ -823,8 +873,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             Instruction_font = pygame.font.SysFont("timesnewroman",20)
             # Instruction_surface = Instruction_font.render("Visual information: X & Y & Z without Haptic Feedback", True, (0, 0, 0))
             # surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
-            line1 = "You will SEE cursor move left/right, up/down, & change size"
-            line2 = "You will NOT FEEL any buzzing"
+            line1 = "You will see the cursor move left/right, up/down, & change size,"
+            line2 = "but you will not feel any buzzing."
 
             # Render the text for each line separately
             line1_surface = Instruction_font.render(line1, True, (0, 0, 0))
@@ -866,12 +916,13 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
                                 if hover_durationZ >= 5:
                                     stop_HapticZ(ledz)
+                                    time.sleep(5)
                                     Font1 = pygame.font.SysFont("timesnewroman", 30)
-                                    textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
+                                    textSurface1 = Font1.render("Press A.", True, (0, 0, 0))
                                     surface_main.fill(WHITE)
                                     surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
                                     pygame.display.update()
-                                    time.sleep(3)
+                                    time.sleep(1)
                                     return
                             else: 
                                 bulletRadius +=0.5 
@@ -887,8 +938,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             Instruction_font = pygame.font.SysFont("timesnewroman",20)
             # Instruction_surface = Instruction_font.render("Visual information: X & Y with Haptic Feedback: Z", True, (0, 0, 0))
             # surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
-            line1 = "You will ONLY SEE cursor move left/right & up/down"
-            line2 = "You will ONLY FEEL a buzz when cursor changes size"
+            line1 = "You will SEE the cursor move left/right & up/down, but you will NOT SEE"
+            line2 = "the cursor change size. Instead, pay attention to the buzz on your limb."
 
             # Render the text for each line separately
             line1_surface = Instruction_font.render(line1, True, (0, 0, 0))
@@ -932,12 +983,13 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 current_timeZ = time.time()
                                 hover_durationZ = current_timeZ - start_hover_timeZ
                                 if hover_durationZ >= hover_threshold:
+                                    time.sleep(5)
                                     Font1 = pygame.font.SysFont("timesnewroman", 30)
-                                    textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
+                                    textSurface1 = Font1.render("Press A.", True, (0, 0, 0))
                                     surface_main.fill(WHITE)
                                     surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
                                     pygame.display.update()
-                                    time.sleep(3)
+                                    time.sleep(1)
                                     return
                             else: 
                                 bulletRadius +=0.5
@@ -954,21 +1006,24 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             Instruction_font = pygame.font.SysFont("timesnewroman",20)
 #            Instruction_surface = Instruction_font.render("Visual information: Z with Haptic Feedback: X & Y", True, (0, 0, 0))
 #            surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
-            line1 = "You will ONLY SEE cursor change size"
-            line2 = "You will ONLY FEEL a buzz when cursor moves left/right & up/down"
-
+            line1 = "You will SEE the cursor change size, but will NOT SEE the cursor"
+            line2 = "move left/right & up/down. Instead, you will feel a buzz to the limbs"
+            line3 = "controlling the cursor in those directions."
             # Render the text for each line separately
             line1_surface = Instruction_font.render(line1, True, (0, 0, 0))
             line2_surface = Instruction_font.render(line2, True, (0, 0, 0))
+            line3_surface = Instruction_font.render(line3, True, (0, 0, 0))
 
             # Calculate the position for each line to ensure they are properly spaced
             # line1_position = ((SCREEN_WIDTH - line1_surface.get_width())/2 , (SCREEN_HEIGHT - line1_surface.get_height()) / 6)
             # line2_position = ((SCREEN_WIDTH - line2_surface.get_width())/2 , line1_position[1] + line1_surface.get_height() + 10)  # Adjust 10 as needed for spacing
             line1_position = (10, (SCREEN_HEIGHT - line1_surface.get_height()) / 6)
             line2_position = (10, line1_position[1] + line1_surface.get_height() + 10)  # Adjust 10 as needed for spacing
+            line3_position = (10, line2_position[1] + line2_surface.get_height() + 10)  # Adjust 10 as needed for spacing
             # Blit each line of text onto the game surface
             surface_game.blit(line1_surface, line1_position)
             surface_game.blit(line2_surface, line2_position)
+            surface_game.blit(line3_surface, line3_position)
        #all haptic feedback (z)
         if haptic_blocks == 5:
             if bulletTargetXDist <= 1:
@@ -1001,12 +1056,12 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
                                 if hover_durationZ >= 5:
                                     stop_HapticZ(ledz)
-                                    Font1 = pygame.font.SysFont("timesnewroman", 20)
-                                    textSurface1 = Font1.render("Instruction Finished!", True, (0, 0, 0))
+                                    Font1 = pygame.font.SysFont("timesnewroman", 30)
+                                    textSurface1 = Font1.render("Press A.", True, (0, 0, 0))
                                     surface_main.fill(WHITE)
                                     surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
                                     pygame.display.update()
-                                    time.sleep(3)
+                                    time.sleep(1)
                                     return
                             else: 
                                 bulletRadius +=0.5   
@@ -1025,8 +1080,8 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             Instruction_font = pygame.font.SysFont("timesnewroman",20)
 #            Instruction_surface = Instruction_font.render("Only Haptic Feedback: X & Y & Z", True, (0, 0, 0))
 #            surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
-            line1 = "You will NOT SEE cursor move in any direction"
-            line2 = "You will FEEL a buzz when cursor moves left/right, up/down, & changes size"
+            line1 = "You will NOT SEE the cursor move in any direction, instead you will"
+            line2 = "feel a buzz to each limb as you control the cursor direction."
 
             # Render the text for each line separately
             line1_surface = Instruction_font.render(line1, True, (0, 0, 0))
@@ -1071,8 +1126,13 @@ def instruction(haptic_blocks,control_mapping_blocks):
     surface_main.fill(WHITE)
     surface_main.blit(textsurface1, ((SCREEN_WIDTH - textsurface1.get_width())/2, (SCREEN_HEIGHT - textsurface1.get_height())/2))
     pygame.display.update()
+<<<<<<< HEAD
     time.sleep(3)
     while TRIAL<3:
+=======
+    time.sleep(1)
+    while TRIAL<2:
+>>>>>>> 53541c2138140cd55943e577672dcfe147c4ceb3
         running = False 
         instruction = True
         print("TRIAL")
@@ -1340,9 +1400,15 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
 # instruction(haptic_blocks=5)
 haptic_blocks = 4
 control_mapping_blocks = 1
+<<<<<<< HEAD
 #instruction(haptic_blocks,control_mapping_blocks)
 #run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 run_testing_trial_block(haptic_blocks,control_mapping_blocks)
+=======
+instruction(haptic_blocks,control_mapping_blocks)
+#run_familiarization_trials(haptic_blocks,control_mapping_blocks)
+#run_testing_trial_block(haptic_blocks,control_mapping_blocks)
+>>>>>>> 53541c2138140cd55943e577672dcfe147c4ceb3
 # #run_one_experiment_block(haptic_blocks)
 # # now start random order of haptic conditions
 haptic_blocks = [4,5]
