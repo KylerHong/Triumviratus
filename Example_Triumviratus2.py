@@ -405,16 +405,16 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
 			#print ('I am running condition 1!')
             bulletColor = (132, 0, 132)     
             pygame.draw.circle(surface_game, bulletColor, (325, 325), bulletRadius)
-            beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
-            beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+            beepstarttimex = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttimex,ledx)
+            beepstarttimey = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttimey,ledy)
 
         #Only Haptic Feedback
         elif haptic_blocks == 5:
 			#print ('I am running condition 1!')
             bulletColor = (132, 0, 132)     
             pygame.draw.circle(surface_game, bulletColor, (325, 325), 20)
-            beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
-            beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+            beepstarttimex = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttimex,ledx)
+            beepstarttimey = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttimey,ledy)
             beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
 
         for event in pygame.event.get():
@@ -494,18 +494,21 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
       
         if testing_just_GUI == False:
             # for foot pedal front (toe) and rear (heel) control value mapping
-            if (foot_axis.voltage>=0.02 and foot_axis.voltage <1.32):
-                mapped_value = np.interp(foot_axis.voltage,[0.02,0.5],[-1,0])
-            if (foot_axis.voltage>=2.0 and foot_axis.voltage<=3.30):
-                mapped_value = np.interp(foot_axis.voltage,[2.0,3.3],[0,1])
+            # if (foot_axis.voltage>=0.02 and foot_axis.voltage <1.32):
+            #     mapped_value = np.interp(foot_axis.voltage,[0.02,0.5],[-1,0])
+            # if (foot_axis.voltage>=2.0 and foot_axis.voltage<=3.30):
+            #     mapped_value = np.interp(foot_axis.voltage,[2.0,3.3],[0,1])
+            if (foot_axis.voltage>= 0.02 and foot_axis.voltage <= 0.60):
+                mapped_value = np.interp(foot_axis.voltage,[0.02,0.60],[-1,0])
+            if (foot_axis.voltage>=3.0 and foot_axis.voltage<=3.30):
+                mapped_value = np.interp(foot_axis.voltage,[3.0,3.30],[0,1])
         if testing_just_GUI == True:
             mapped_value = 1
 
         # Joystick control and foot pedal for X:left-thumb joystick  //
         # Y: right-thumb joystick & Z: Foot pedal#
-        if abs(mapped_value)<0.3:
+        if foot_axis.voltage >0.60 and foot_axis.voltage < 3.0 :
             mapped_value = 0
-
       
         #This just zeros the value of the joystick movements if they're less than 0.1
         if abs(joyAxisValue[0]) < 0.1:
@@ -631,6 +634,9 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             # if subject hovers over target position long enough (meets success criteria)
             if hover_duration >= hover_threshold:
                 #duration of trial
+                stop_HapticX(ledx)
+                stop_HapticY(ledy)
+                stop_HapticZ(ledz)
                 end_time = time.time() - START_TIME
 				# Coordination
                 rounded_coord_score_success = calculate_coordination(filename,targetAngle,end_time)
@@ -927,12 +933,12 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 bulletRadius +=0.5
                     else:
                         bulletY += constant_velocity_y
-                        beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+                        beepstarttimey = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttimey,ledy)
 
             else:
                 bulletX += 1
                 hovering_over_target = False
-                beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
+                beepstarttimex = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttimex,ledx)
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (325,325),bulletRadius)   
             Instruction_font = pygame.font.SysFont("timesnewroman",20)
@@ -1000,12 +1006,12 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                                 beepstarttime = HapticZ(bulletTargetZDistance,bulletRadius,targetRadius,beepstarttime,ledz)
                     else:
                         bulletY += constant_velocity_y
-                        beepstarttime = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttime,ledy)
+                        beepstarttimey = HapticY(bulletTargetYDistance,bulletTargetYDist,targetRadius,beepstarttimey,ledy)
 
             else:
                 bulletX += 1
                 hovering_over_target = False
-                beepstarttime = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttime,ledx)
+                beepstarttimex = HapticX(bulletTargetXDistance,bulletTargetXDist, targetRadius,beepstarttimex,ledx)
 
             pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius)  # need to modify this for no visual feedback trials
             pygame.draw.circle(surface_game, (102, 0, 102), (325,325),20)   
@@ -1060,8 +1066,6 @@ def instruction(haptic_blocks,control_mapping_blocks):
     pygame.display.update()
     time.sleep(1)
     while TRIAL<3:
-    #     time.sleep(1)
-    # while TRIAL<2:
         running = False 
         instruction = True
         print("TRIAL")
@@ -1328,13 +1332,11 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
 # haptic_blocks =2 
 # instruction(haptic_blocks=5)
 haptic_blocks = 1
-control_mapping_blocks = 1
+control_mapping_blocks = 2
 instruction(haptic_blocks,control_mapping_blocks)
 run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 run_testing_trial_block(haptic_blocks,control_mapping_blocks)
-#run_familiarization_trials(haptic_blocks,control_mapping_blocks)
-#run_testing_trial_block(haptic_blocks,control_mapping_blocks)
-# #run_one_experiment_block(haptic_blocks)
+
 # # now start random order of haptic conditions
 haptic_blocks = [2,3,4,5]
 random.shuffle(haptic_blocks)
@@ -1342,13 +1344,13 @@ with open('haptic_conditions.txt','a') as file_haptic_conditions:
    file_haptic_conditions.write(f"{haptic_blocks}\n")
 
 for i in range(4):
-    control_mapping_blocks =1 
+    control_mapping_blocks =2 
     instruction(haptic_blocks[i],control_mapping_blocks)
     run_familiarization_trials(haptic_blocks[i],control_mapping_blocks)
     run_testing_trial_block(haptic_blocks[i],control_mapping_blocks)
 
 haptic_blocks =1
-control_mapping_blocks =1
+control_mapping_blocks =2
 instruction(haptic_blocks,control_mapping_blocks)
 run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 run_testing_trial_block(haptic_blocks,control_mapping_blocks)
