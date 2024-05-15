@@ -129,7 +129,7 @@ def randomize_target_positions(): #this should be called as many times as there 
     max_scaled = 650
 
     np.random.seed()	
-    angles = [0, 45, 135, 180, 225, 315]
+    angles = [0, 45, 135, 225, 315]
 
     for val in radius:
         for deg in angles:
@@ -145,7 +145,7 @@ def randomize_target_positions(): #this should be called as many times as there 
             pos.append((scaled_x, scaled_y, radius, deg, distance))
 
     np.random.shuffle(pos)
-    grp_pos.append(pos[0:24])
+    grp_pos.append(pos[0:20])
     #grp_pos.append(pos[12:24])
 
     return grp_pos
@@ -157,6 +157,7 @@ def calculate_coordination(filename,targetAngle,trial_time):
     
     # look through the list and find the point where one of the indices 1-3 is not longer zero. use this point to calculate the
     # length of the list
+    length_xyzlist = 0
     for i, item in enumerate(coord_xyzlist):
         # Check if any of the elements at indices 1, 2, or 3 are not zero
         if item[1] != 0 or item[2] != 0 or item[3] != 0:
@@ -310,6 +311,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
     xaxis_raw = []
     yaxis_raw = []
     zaxis_raw = []
+    success = []
     position_append = []
     targets_2D = [0, 3, 6, 13, 17, 19, 20, 22] 
     constant_velocity_x = 2.0
@@ -321,19 +323,18 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
 
     if testing_just_GUI == False:
         # if control mapping = 1, ledx = 12; ledy = 13;, ledz = 19  
-
         if control_mapping_blocks == 1:
             ledx = PWMLED(12)
-            ledy = PWMLED(13)
+            ledy = PWMLED(6)
             ledz = PWMLED(19)
         elif control_mapping_blocks == 2:
-            ledx = PWMLED(13)
+            ledx = PWMLED(6)
             ledy = PWMLED(19)
             ledz = PWMLED(12)      
         elif control_mapping_blocks == 3:
             ledx = PWMLED(19)
             ledy = PWMLED(12)
-            ledz = PWMLED(13)         
+            ledz = PWMLED(6)         
         else:
             ledx = 1
             ledy = 1
@@ -498,17 +499,39 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             #     mapped_value = np.interp(foot_axis.voltage,[0.02,0.5],[-1,0])
             # if (foot_axis.voltage>=2.0 and foot_axis.voltage<=3.30):
             #     mapped_value = np.interp(foot_axis.voltage,[2.0,3.3],[0,1])
-            if (foot_axis.voltage>= 0.02 and foot_axis.voltage <= 0.60):
-                mapped_value = np.interp(foot_axis.voltage,[0.02,0.60],[-1,0])
-            if (foot_axis.voltage>=3.0 and foot_axis.voltage<=3.30):
-                mapped_value = np.interp(foot_axis.voltage,[3.0,3.30],[0,1])
-        if testing_just_GUI == True:
-            mapped_value = 1
+
+            # if (foot_axis.voltage>= 0.02 and foot_axis.voltage <= 0.6):
+            #     mapped_value = np.interp(foot_axis.voltage,[0.02,0.6],[-1,0])
+            # if (foot_axis.voltage>=3.0 and foot_axis.voltage<=3.30):
+            #     mapped_value = np.interp(foot_axis.voltage,[3.0,3.30],[0,1])
+        
+        
+        # MIGHT NEED TO TROUBLESHOOT
+        # #new foot pedal
+            if (foot_axis.voltage>= 0.01 and foot_axis.voltage <= 0.6):
+                mapped_value = np.interp(foot_axis.voltage,[0.01,0.6],[-1,0])
+            if (foot_axis.voltage>=2.0 and foot_axis.voltage<=3.30):
+                mapped_value = np.interp(foot_axis.voltage,[2.0,3.30],[0,1])
+        # if testing_just_GUI == True:
+        #     mapped_value = 1
+
+        #old foot pedal
+        #     if (foot_axis.voltage>= 0.01 and foot_axis.voltage <= 1.0):
+        #         mapped_value = np.interp(foot_axis.voltage,[0.01,1.0],[-1,0])
+        #     if (foot_axis.voltage>=2.0 and foot_axis.voltage<=3.30):
+        #         mapped_value = np.interp(foot_axis.voltage,[2.0,3.30],[0,1])
+        # if testing_just_GUI == True:
+        #     mapped_value = 1
 
         # Joystick control and foot pedal for X:left-thumb joystick  //
         # Y: right-thumb joystick & Z: Foot pedal#
-        if foot_axis.voltage >0.60 and foot_axis.voltage < 3.0 :
-            mapped_value = 0
+        # #new foot pedal
+            if foot_axis.voltage >0.60 and foot_axis.voltage < 2.0 :
+                mapped_value = 0
+
+        # old foot pedal
+        # if foot_axis.voltage >1.0 and foot_axis.voltage < 2.0 :
+        #     mapped_value = 0
       
         #This just zeros the value of the joystick movements if they're less than 0.1
         if abs(joyAxisValue[0]) < 0.1:
@@ -541,12 +564,12 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             if(joyAxisValue[1] > 0): 
                 if (bulletY + bulletRadius < 650):
                     bulletY += constant_velocity_y
-                    print(bulletY)
-                    print(targetY)
+                    # print(bulletY)
+                    # print(targetY)
             if(joyAxisValue[1] < 0):
                 if(bulletY - bulletRadius >0):
                     bulletY -= constant_velocity_y
-                    print(bulletY)
+                    # print(bulletY)
             if(joyAxisValue[3] > 0):                                          
                 if(bulletX + bulletRadius < 650):
                     bulletX += constant_velocity_x
@@ -613,14 +636,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         pygame.draw.circle(surface_game, (255, 102, 102), (targetX, targetY), targetRadius,3)
         with open (filename,'ab') as file:
             pickle.dump((joy_time, xaxis, yaxis, zaxis, xaxis_raw, yaxis_raw, zaxis_raw), file)
- 
-        with open (filename_position,'a',newline='') as file_position:
-			# json.dump(columns_data,file_position,indent=3)
-            csv_writer = csv.writer(file_position)
-            if file_position.tell() == 0:
-                csv_writer.writerow([joy_time,bulletX,bulletY,bulletRadius,xaxis, yaxis,zaxis])
-            csv_writer.writerow([joy_time,bulletX, bulletY, bulletRadius,xaxis, yaxis,zaxis])
-            
+    
         surface_main.blit(surface_game,(0,0))
         surface_main.blit(surface_panel, (650, 0))
         pygame.display.update()
@@ -638,6 +654,7 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 stop_HapticY(ledy)
                 stop_HapticZ(ledz)
                 end_time = time.time() - START_TIME
+                success = 1
 				# Coordination
                 rounded_coord_score_success = calculate_coordination(filename,targetAngle,end_time)
 				# Dispaly success message and coordination score measure
@@ -649,15 +666,16 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
                 surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
                 surface_main.blit(textSurface2, ((SCREEN_WIDTH - textSurface2.get_width())/2, (SCREEN_HEIGHT - textSurface2.get_height())/2))
                 pygame.display.update()
-                time.sleep(3)
-                return
+                time.sleep(2)
+                break 
         else:
             hovering_over_target = False
 
 		# Trial times out after x seconds
-        if(time.time() - START_TIME > 60): # you can change this number to shorten or extend how long the trials are for testing
+        if(time.time() - START_TIME > 10): # you can change this number to shorten or extend how long the trials are for testing
             end_time = time.time() - START_TIME
-            print(end_time)
+            success = 0
+            # print(end_time)
             rounded_coord_score_fail = calculate_coordination(filename, targetAngle, end_time)
 			# Display fail message
             Font1 = pygame.font.SysFont("timesnewroman", 30)
@@ -668,9 +686,18 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             surface_main.blit(textSurface1, ((SCREEN_WIDTH - textSurface1.get_width())/2, (SCREEN_HEIGHT - textSurface1.get_height())/4))
             surface_main.blit(textSurface2, ((SCREEN_WIDTH - textSurface2.get_width())/2, (SCREEN_HEIGHT - textSurface2.get_height())/2))
             pygame.display.update()
-            time.sleep(3)
-            return
+            time.sleep(2)
+            break 
         time.sleep(0.01)
+        
+        with open (filename_position,'a',newline='') as file_position:
+            # json.dump(columns_data,file_position,indent=3)
+            csv_writer = csv.writer(file_position)
+            if file_position.tell() == 0:
+                csv_writer.writerow([joy_time,bulletX,bulletY,bulletRadius,xaxis, yaxis,zaxis])
+            csv_writer.writerow([joy_time,bulletX, bulletY, bulletRadius,xaxis, yaxis,zaxis])
+                
+
 
 # This is the instruction session loop that runs the GUI
     while instruction:
@@ -1018,21 +1045,26 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
             Instruction_font = pygame.font.SysFont("timesnewroman",20)
 #            Instruction_surface = Instruction_font.render("Only Haptic Feedback: X & Y & Z", True, (0, 0, 0))
 #            surface_game.blit(Instruction_surface, ((SCREEN_WIDTH - Instruction_surface.get_width())/4, (SCREEN_HEIGHT - Instruction_surface.get_height())/4))
-            line1 = "You will NOT SEE the cursor move in any direction, instead you will"
-            line2 = "feel a buzz to each limb as you control the cursor direction."
-
+            line1 = "The cursor will move, but you will NOT SEE this movement. Instead, your"
+            line2 = "limbs will receive buzzing to inform you how close you are to the target."
+            line3 = ""
+            
             # Render the text for each line separately
             line1_surface = Instruction_font.render(line1, True, (0, 0, 0))
             line2_surface = Instruction_font.render(line2, True, (0, 0, 0))
+            line3_surface = Instruction_font.render(line3, True, (0, 0, 0))
 
             # Calculate the position for each line to ensure they are properly spaced
             # line1_position = ((SCREEN_WIDTH - line1_surface.get_width())/2 , (SCREEN_HEIGHT - line1_surface.get_height()) / 6)
             # line2_position = ((SCREEN_WIDTH - line2_surface.get_width())/2 , line1_position[1] + line1_surface.get_height() + 10)  # Adjust 10 as needed for spacing
             line1_position = (10, (SCREEN_HEIGHT - line1_surface.get_height()) / 6)
             line2_position = (10, line1_position[1] + line1_surface.get_height() + 10)  # Adjust 10 as needed for spacing
+            line3_position = (10, line2_position[1] + line2_surface.get_height() + 10)  # Adjust 10 as needed for spacing
+            
             # Blit each line of text onto the game surface
             surface_game.blit(line1_surface, line1_position)
             surface_game.blit(line2_surface, line2_position)
+            surface_game.blit(line3_surface, line3_position)
 
         # beepstarttime = HapticX(bulletTargetXDist, targetRadius,beepstarttime,ledx)
         surface_main.blit(surface_game,(0,0))
@@ -1040,6 +1072,17 @@ def GUI(TRIAL, START_TIME, targetX, targetY, targetRadius, targetAngle, haptic_b
         pygame.display.update()
         clock.tick(120)
         time.sleep(0.01)
+
+    with open ('trial_success_coord.csv','a',newline='') as file_trial_metrics:
+        # json.dump(columns_data,file_position,indent=3)
+        csv_writer = csv.writer(file_trial_metrics)
+        if file_trial_metrics.tell() == 0:
+            header = ['Success or Fail','Coordination Score']
+            csv_writer.writerow(header)
+        if success == 0:
+            csv_writer.writerow([success, rounded_coord_score_fail])
+        if success == 1:
+            csv_writer.writerow([success,rounded_coord_score_success])
 
 def instruction(haptic_blocks,control_mapping_blocks):
 
@@ -1068,7 +1111,7 @@ def instruction(haptic_blocks,control_mapping_blocks):
     while TRIAL<3:
         running = False 
         instruction = True
-        print("TRIAL")
+        # print("TRIAL")
         #START_TIME = time.time()
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -1213,7 +1256,8 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
     for _ in range(len(grp_pos)):
         target_data = grp_pos[_]
         json_array.append(target_data)   
-
+    print("hi")
+    print(len(json_array))
     # Initialize filename for each each block
     block_filename = get_unique_filename_block()
     with open (block_filename,'w') as block_file:
@@ -1226,9 +1270,10 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
     pygame.display.update()
     time.sleep(1.5)    
     # Main experiment loop
-    while TRIAL < 24:
+    while TRIAL < 20:
         instruction = False 
         running = True
+        print(TRIAL)
         # Initialize trial targets
         with open(block_filename,"r") as file:
             target_data = json.load(file)
@@ -1263,7 +1308,7 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
                     GUI(TRIAL, START_TIME, trial_targets['target_x'], trial_targets['target_y'], trial_targets['target_z_initial'],trial_targets['target_angle'], haptic_blocks, instruction, running,control_mapping_blocks) # here we call the main script to initiate the bullet/target trial screen
                     TRIAL += 1
                     duration = time.time() - START_TIME
-                    if TRIAL == 12:
+                    if TRIAL == 10:
                         done = False
                         print("It's time to take Bedford")
                         surface_main.fill(WHITE)
@@ -1295,9 +1340,9 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
                                             pickle.dump(textInput.value,file)
                                         done = True                                    
                                     # return TRIAL, duration                                    
-                    if TRIAL == 12 and done == True:
+                    if TRIAL == 10 and done == True:
                         continue
-                    if TRIAL == 24:
+                    if TRIAL == 20:
                         done = False
                         print("It's time to take Bedford & finish the testing sessions")
                         surface_main.fill(WHITE)
@@ -1329,8 +1374,8 @@ def run_testing_trial_block(haptic_blocks,control_mapping_blocks):
                                             pickle.dump(textInput.value,file)
                                         done = True                                    
 
-# haptic_blocks =2 
-# instruction(haptic_blocks=5)
+# PLEASE ONLY CHANGE CONTROL_MAPPING_BLOCKS
+
 haptic_blocks = 1
 control_mapping_blocks = 2
 instruction(haptic_blocks,control_mapping_blocks)
@@ -1338,52 +1383,21 @@ run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 run_testing_trial_block(haptic_blocks,control_mapping_blocks)
 
 # # now start random order of haptic conditions
-haptic_blocks = [2,3,4,5]
+haptic_blocks = [2,3,4,5]  
 random.shuffle(haptic_blocks)
 with open('haptic_conditions.txt','a') as file_haptic_conditions:
    file_haptic_conditions.write(f"{haptic_blocks}\n")
 
 for i in range(4):
-    control_mapping_blocks =2 
+    control_mapping_blocks =2
     instruction(haptic_blocks[i],control_mapping_blocks)
     run_familiarization_trials(haptic_blocks[i],control_mapping_blocks)
     run_testing_trial_block(haptic_blocks[i],control_mapping_blocks)
 
-haptic_blocks =1
-control_mapping_blocks =2
+haptic_blocks =1  
+control_mapping_blocks =2                                                                                                                                 
 instruction(haptic_blocks,control_mapping_blocks)
 run_familiarization_trials(haptic_blocks,control_mapping_blocks)
 run_testing_trial_block(haptic_blocks,control_mapping_blocks)
 
-
-# haptic_blocks =1
-# control_mapping_blocks = 2
-# instruction(haptic_blocks,control_mapping_blocks)
-# run_familiarization_trials(haptic_blocks,control_mapping_blocks)
-# run_testing_trial_block(haptic_blocks,control_mapping_blocks)
-# #run_one_experiment_block(haptic_blocks)
-# # now start random order of haptic conditions
-# haptic_blocks = [2,3,4,5]
-# random.shuffle(haptic_blocks)
-
-# for i in range(4):
-#     control_mapping_blocks =2 
-#     control_mapping_blocks =1 
-#     instruction(haptic_blocks[i],control_mapping_blocks)
-#     run_familiarization_trials(haptic_blocks[i],control_mapping_blocks)
-#     run_testing_trial_block(haptic_blocks[i],control_mapping_blocks)
-    
-# haptic_blocks =1
-# control_mapping_blocks =2 
-# instruction(haptic_blocks,control_mapping_blocks)
-# run_familiarization_trials(haptic_blocks,control_mapping_blocks)
-# run_testing_trial_block(haptic_blocks,control_mapping_blocks)
-# # instruction(haptic_blocks[0])
-# # run_familiarization_trials(haptic_blocks[0])
-# #run_one_experiment_block(haptic_blocks[0])
-# # back to condition 1
-# # haptic_blocks = 1
-# # instruction(haptic_blocks)
-# # run_familiarization_trials(haptic_blocks)
-# #run_one_experiment_block(haptic_blocks)
 
